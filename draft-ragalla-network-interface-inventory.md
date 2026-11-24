@@ -595,7 +595,7 @@ be percent-encoded when they contain reserved characters:
 
 ```http
    GET /restconf/data/inventory-network-interfaces:\
-       network-interface-inventory/device=RouterB.subdomain1.region3.bt.uk/\
+       network-interface-inventory/device=RouterB.subdomain1.region3.isp.example.net/\
        ietf-interfaces:interfaces
 ```
 
@@ -610,7 +610,7 @@ context; it is not the literal body of this subtree GET.
 
 ```http
    GET /restconf/data/inventory-network-interfaces:\
-       network-interface-inventory/device=RouterB.subdomain1.region3.bt.uk/\
+       network-interface-inventory/device=RouterB.subdomain1.region3.isp.example.net/\
        ietf-interfaces:interfaces/\
        interface=Bundle-Ether10
 ```
@@ -699,7 +699,7 @@ ietf-interfaces defines it using the YANG binary type.
   "inventory-network-interfaces:network-interface-inventory": {
     "device": [
       {
-        "ne-ref": "RouterB.subdomain1.region3.bt.uk",
+        "ne-ref": "RouterB.subdomain1.region3.isp.example.net",
         "ietf-interfaces:interfaces": {
           "interface": [
             {
@@ -724,7 +724,7 @@ ietf-interfaces defines it using the YANG binary type.
               "device-interface-attributes:topology-ref": [
                 {
                   "network-ref": "mobilecore.region3.l2",
-                  "node-ref": "RouterB.subdomain1.region3.bt.uk",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
                   "tp-ref": "TenGigE0/1/0/0"
                 }
               ]
