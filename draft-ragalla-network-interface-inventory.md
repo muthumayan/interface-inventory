@@ -102,6 +102,19 @@ component and topology termination points. A client using the separate
 data sets may need to obtain and correlate information from device,
 inventory, and topology views, including multiple topology layers.
 
+For example, a controller can learn from the RFC 8345 topology model
+which link connects two network devices. If that link is realized as a
+link aggregation group (LAG) and the link degrades (for example, due to
+loss/errors on one member), troubleshooting typically requires identifying
+the member interfaces of the LAG on each device. A controller may already
+collect the LAG and member-interface relationships while building its
+topology view, but RFC 8345 does not provide a device-scoped interface
+inventory with operational state and layering that can be retrieved and
+correlated directly to the topology termination points. This document's
+model allows the controller to expose that per-device interface inventory
+and its correlations northbound, so clients can navigate from a topology
+link to the underlying per-device member interfaces and their state.
+
 The proposed model provides a common structure for that view. Its
 completeness and accuracy depend on the data available to the server
 and on the server's discovery and reconciliation mechanisms.
@@ -136,14 +149,13 @@ RFC 8346, RFC 8944, or the IVY drafts.
 
 ## 5.1.  Design Summary
 
-- "device-interfaces/device" is keyed by "ne-ref", a leafref into
+- "network-interface-inventory/device" is keyed by "ne-ref", a leafref into
   the IVY "network-element" list -- the same device identifier
   already used by inventory, so no new device identity scheme is
   introduced.
 
-- Each "device" list entry contains an "interfaces-root"
-  container that declares an RFC 8528 mount point (label
-  "device-root"), under which the server exposes a mounted
+- Each "device" list entry is an RFC 8528 mount point labeled
+  "interfaces-root", under which the server exposes a mounted
   "ietf-interfaces:interfaces" subtree. The server advertises the
   mounted module set in schema-mount/YANG Library data.
 
@@ -169,18 +181,44 @@ RFC 8346, RFC 8944, or the IVY drafts.
   LAG/VLAN relationships; the discovery and reconciliation
   mechanism is implementation-specific.
 
+The following illustration shows the hierarchy and example correlations.
+Device identifiers are abbreviated, and RouterX represents another
+network element. Arrows indicate relationships, not data containment.
+
+```text
+network-interface-inventory
+|
++-- device [ne-ref = RouterA] [mount point: interfaces-root]
+|   +-- interfaces ...
+|
++-- device [ne-ref = RouterB] [mount point: interfaces-root]
+|   +-- interfaces
+|       +-- interface [Bundle-Ether10]
+|       |   +-- lower-layer-if --> TenGigE0/1/0/0
+|       |   +-- topology-ref -----> network / node / TP
+|       |
+|       +-- interface [TenGigE0/1/0/0]
+|           +-- higher-layer-if -> Bundle-Ether10
+|           +-- inventory-ref ---> port component in RouterB
+|           +-- topology-ref -----> network / node / TP
+|
+|   ...
+|
++-- device [ne-ref = RouterX] [mount point: interfaces-root]
+    +-- interfaces ...
+```
+
 ## 5.2.  Tree Diagram
 
 Parent schema module: example-device-interface-inventory
 
 ```text
-  +--ro device-interfaces
+  +--ro network-interface-inventory
      +--ro device* [ne-ref]
         +--ro ne-ref             -> /nei:network-inventory/.../ne-id
-        +--ro interfaces-root
-           +--mp device-root
-              (mounted schema set includes ietf-interfaces and
-               example-device-interface-attributes)
+        +--mp interfaces-root
+           (mounted schema set includes ietf-interfaces and
+            example-device-interface-attributes)
 ```
 
 Mounted schema augmentation module:
@@ -205,143 +243,41 @@ example-device-interface-attributes
     +--ro notes?                    string
 ```
 
-## 5.3.  Attribute Definitions, Protocol/Model References, and Examples
+## 5.3.  Augmentation Overview
 
-This section gives a plain-language definition, an example value,
-and -- where one exists -- the closest SNMP MIB object and the
-closest published OpenConfig leaf for every attribute this
-document's augmentation adds to a mounted "if:interface" entry.
-OpenConfig references are included because, independently of this
-document, OpenConfig has already faced and partly solved the same
-"device-scoped interface with LAG/VLAN stacking" problem; where an
-OpenConfig leaf exists it is cited as corroborating prior art, and
-where none exists that is stated explicitly rather than left
-silent, since an operator migrating between the two model
-families needs to know which attributes have no counterpart.
+The mounted interface augmentation provides three categories of
+information:
 
-**inventory-ref (container: port-ref)**  
-Definition: Identifies the physical port component associated with
-this interface, when known. "port-ref" is the IVY component-id within
-the network element identified by the enclosing device's "ne-ref".
-It is a string identifier; retrieving additional component details
-requires access to the IVY inventory.  
-MIB reference: ENTITY-MIB.entAliasMappingTable, RFC 6933
-(maps ifIndex to entPhysicalIndex).  
-OpenConfig reference: openconfig-platform-port's
-"hardware-port" leaf on an interface performs a similar
-per-device binding.  
-Example: { "port-ref": "TenGigE0/1/0/0" }, under the device
-whose "ne-ref" is "RouterB.subdomain1.region3.bt.uk".
+- Correlation identifiers to connect per-device interface entries to
+  inventory and topology views.
 
-**topology-ref (list: network-ref, node-ref, tp-ref)**  
-Definition: Correlates this interface to one or more RFC 8345
-termination points (physical, L2, and/or L3 views).  
-MIB reference: none.  
-OpenConfig reference: none; OpenConfig does not model stored
-topology references at the interface level at all.  
-Example: [ { "network-ref": "mobilecore.region3.l2",
-"node-ref": "RouterB.subdomain1.region3.bt.uk",
-"tp-ref": "TenGigE0/1/0/0" } ]
+- Convenience leaves derived from topology data, so clients do not need
+  to dereference topology termination points to retrieve common values.
 
-**vlan-id**  
-Definition: The outer 802.1Q VLAN tag carried by this
-sub-interface.  
-MIB reference: Q-BRIDGE-MIB.dot1qVlanStaticTable (RFC 4363);
-not part of IF-MIB itself.  
-OpenConfig reference:
-openconfig-vlan:/interfaces/interface/subinterfaces/
-subinterface/vlan/match/single-tagged/config/vlan-id -- same
-range (1-4094), confirming the chosen type.  
-Example: 100
+- Additional operational attributes and annotations not defined by the
+  base interface model.
 
-**ip-address**  
-Definition: IP address(es) bound to this interface.  
-MIB reference: IP-MIB.ipAddressIfIndex, RFC 4293.  
-OpenConfig reference:
-openconfig-if-ip:/interfaces/interface/subinterfaces/
-subinterface/ipv4/addresses/address/config/ip.  
-Example: [ "192.0.2.1" ]
+Normative definitions for the augmentation are in the YANG modules in
+Section 6. Examples are in Section 8. Informative comparisons and
+mappings are in Appendices E, F, and G.
 
-**mtu**  
-Definition: Maximum transmission unit, in octets, for this
-interface.  
-MIB reference: IF-MIB.ifMtu, RFC 2863. RFC 8343 Section 4
-explicitly declines to map ifMtu, leaving it to interface-
-type-specific augmentations -- which is exactly what this
-leaf is.  
-OpenConfig reference:
-openconfig-interfaces:/interfaces/interface/config/mtu
-(type uint16); this document's "mtu" leaf is typed uint16 to
-match.  
-Example: 9216 (jumbo MTU on a LAG bundle)
-
-**duplex-mode**  
-Definition: The Ethernet duplex mode the interface is
-operating in.  
-MIB reference: EtherLike-MIB.dot3StatsDuplexStatus, RFC 3635
-(not part of IF-MIB proper).  
-OpenConfig reference:
-openconfig-if-ethernet:/interfaces/interface/ethernet/config/
-duplex-mode, enumeration { FULL, HALF }. OpenConfig models
-auto-negotiation as a separate boolean "auto-negotiate" rather
-than a third duplex-mode value; this document's "auto" value
-is a convenience rollup for servers that have not yet resolved
-a negotiated duplex.  
-Example: "full-duplex"
-
-**direction**  
-Definition: Signal direction through this interface or
-sub-interface.  
-MIB reference: none.  
-OpenConfig reference: none as a single generic leaf; the
-closest analog is the implicit client/line role assigned in
-an openconfig-terminal-device logical-channel-assignments
-entry, which only applies to optical transport ports.  
-Example: "bidir"
-
-**layer-rate**  
-Definition: The transport layer rate of the signal carried by
-this interface (e.g. Ethernet, OTU4, ODU4, IP).  
-MIB reference: none.  
-OpenConfig reference:
-openconfig-terminal-device:/terminal-device/logical-channels/
-channel/config/{rate-class,trib-protocol}, identityref values
-such as PROT_OTU4 / PROT_ODU4.  
-Example: "OTU4"
-
-**service-state**  
-Definition: The interface's lifecycle/service state (e.g.
-planned, in-test, in-service, maintenance, out-of-service),
-distinct from the physical "admin-status"/"oper-status" pair.  
-MIB reference: none.  
-OpenConfig reference: none at interface scope; this document
-treats "service-state" as a genuine gap in both IF-MIB and
-OpenConfig, not merely in RFC 8343.  
-Example: "in-service"
-
-**floating**  
-Definition: True when this interface is not currently
-participating in any topology view, i.e. its "topology-ref"
-list is empty. The leaf is independent of "inventory-ref": a
-"floating" interface MAY still carry an "inventory-ref" when
-the underlying physical port is known to the inventory system
-but is not wired into any topology (for example, an unused
-chassis port). This semantic was clarified in -01; -00
-incorrectly described this leaf as keyed off "inventory-ref".  
-MIB reference: none.  
-OpenConfig reference: none as an explicit boolean; an absent
-openconfig-platform-port "hardware-port" leaf signals the same
-condition implicitly.  
-Example: false (true for an unused, inventory-only physical
-port such as RouterB's "TenGigE0/2/0/1" in Appendix A, which
-still carries an "inventory-ref" to the chassis port).
-
-**notes**  
-Definition: Free-text annotation for anything not captured by
-a structured leaf above.  
-MIB/OpenConfig reference: none; intentionally unstructured.  
-Example: "Inventory-only physical port; no topology
-termination point or link"
+```text
+   +================+==============================+
+   | Node(s)        | Purpose                      |
+   +================+==============================+
+   | inventory-ref  | Correlate to inventory port  |
+   | topology-ref   | Correlate to topology TP(s)  |
+   | vlan-id        | Convenience VLAN tag         |
+   | ip-address     | Convenience IP address       |
+   | mtu            | Augmented attribute          |
+   | duplex-mode    | Augmented attribute          |
+   | direction      | Augmented attribute          |
+   | layer-rate     | Augmented attribute          |
+   | service-state  | Augmented attribute          |
+   | floating       | Derived/no-topology flag     |
+   | notes          | Free-text annotation         |
+   +================+==============================+
+```
 
 # 6.  YANG Modules
 
@@ -400,17 +336,22 @@ module example-device-interface-inventory {
     reference "draft-ragalla-device-interface-inventory-02";
   }
 
-  container device-interfaces {
+  container network-interface-inventory {
     config false;
     description
-      "Device-scoped interface inventory mount points.";
+      "Network-wide interface inventory organized by network element.";
 
     list device {
       key "ne-ref";
       description
         "One entry for each network element served by this management
          system. The ne-ref leafref is evaluated in the parent schema,
-         outside the mounted schema jail.";
+         outside the mounted schema jail. The server advertises the
+         mounted schema through RFC 8528 schema-mounts data, using an
+         inline or shared-schema entry as appropriate. For this
+         read-only inventory view, the schema-mount config value MUST
+         be false. The mounted module set MUST include ietf-interfaces
+         and example-device-interface-attributes.";
 
       leaf ne-ref {
         type leafref {
@@ -422,20 +363,9 @@ module example-device-interface-inventory {
            interface list.";
       }
 
-      container interfaces-root {
+      yangmnt:mount-point "interfaces-root" {
         description
-          "Mount point parent. The mount label is device-root. The
-           server advertises the mounted schema through RFC 8528
-           schema-mounts data, using an inline or shared-schema entry
-           as appropriate. For this read-only inventory view, the
-           schema-mount config value MUST be false. The mounted module
-           set MUST include ietf-interfaces and
-           example-device-interface-attributes.";
-
-        yangmnt:mount-point "device-root" {
-          description
-            "RFC 8528 mount point for the per-device interface model.";
-        }
+          "RFC 8528 mount point for the per-device interface model.";
       }
     }
   }
@@ -463,7 +393,7 @@ module example-device-interface-attributes {
   description
     "Read-only augmentation of a mounted ietf-interfaces schema for
      device-scoped interface inventory. This module is intended to be
-     included in the mounted schema set at the device-root mount point
+     included in the mounted schema set at the interfaces-root mount point
      defined by example-device-interface-inventory.
 
      RFC 8528 confines a mounted schema to its mount jail. Therefore,
@@ -579,7 +509,7 @@ module example-device-interface-attributes {
       type uint16;
       description "Maximum transmission unit, in octets.";
       reference
-        "RFC 2863 IF-MIB ifMtu; openconfig-interfaces mtu";
+        "RFC 2863 IF-MIB ifMtu; RFC 8343, Sec. 4 (ifMtu not mapped to ietf-interfaces); openconfig-interfaces mtu";
     }
 
     leaf duplex-mode {
@@ -665,8 +595,8 @@ be percent-encoded when they contain reserved characters:
 
 ```http
    GET /restconf/data/example-device-interface-inventory:\
-       device-interfaces/device=RouterB.subdomain1.region3.bt.uk/\
-       interfaces-root/ietf-interfaces:interfaces
+       network-interface-inventory/device=RouterB.subdomain1.region3.bt.uk/\
+       ietf-interfaces:interfaces
 ```
 
 The response representation is the mounted
@@ -680,8 +610,8 @@ context; it is not the literal body of this subtree GET.
 
 ```http
    GET /restconf/data/example-device-interface-inventory:\
-       device-interfaces/device=RouterB.subdomain1.region3.bt.uk/\
-       interfaces-root/ietf-interfaces:interfaces/\
+       network-interface-inventory/device=RouterB.subdomain1.region3.bt.uk/\
+       ietf-interfaces:interfaces/\
        interface=Bundle-Ether10
 ```
 
@@ -766,117 +696,115 @@ ietf-interfaces defines it using the YANG binary type.
 
 ```json
    {
-  "example-device-interface-inventory:device-interfaces": {
+  "example-device-interface-inventory:network-interface-inventory": {
     "device": [
       {
         "ne-ref": "RouterB.subdomain1.region3.bt.uk",
-        "interfaces-root": {
-          "ietf-interfaces:interfaces": {
-            "interface": [
-              {
-                "name": "TenGigE0/1/0/0",
-                "type": "iana-if-type:ethernetCsmacd",
-                "admin-status": "up",
-                "oper-status": "up",
-                "if-index": 10,
-                "phys-address": "qrvMCwEA",
-                "speed": "10000000000",
-                "higher-layer-if": [
-                  "Bundle-Ether10"
-                ],
-                "lower-layer-if": [],
-                "example-device-interface-attributes:mtu": 9216,
-                "example-device-interface-attributes:duplex-mode": "full-duplex",
-                "example-device-interface-attributes:service-state": "in-service",
-                "example-device-interface-attributes:floating": false,
-                "example-device-interface-attributes:inventory-ref": {
-                  "port-ref": "TenGigE0/1/0/0"
-                },
-                "example-device-interface-attributes:topology-ref": [
-                  {
-                    "network-ref": "mobilecore.region3.l2",
-                    "node-ref": "RouterB.subdomain1.region3.bt.uk",
-                    "tp-ref": "TenGigE0/1/0/0"
-                  }
-                ]
+        "ietf-interfaces:interfaces": {
+          "interface": [
+            {
+              "name": "TenGigE0/1/0/0",
+              "type": "iana-if-type:ethernetCsmacd",
+              "admin-status": "up",
+              "oper-status": "up",
+              "if-index": 10,
+              "phys-address": "qrvMCwEA",
+              "speed": "10000000000",
+              "higher-layer-if": [
+                "Bundle-Ether10"
+              ],
+              "lower-layer-if": [],
+              "example-device-interface-attributes:mtu": 9216,
+              "example-device-interface-attributes:duplex-mode": "full-duplex",
+              "example-device-interface-attributes:service-state": "in-service",
+              "example-device-interface-attributes:floating": false,
+              "example-device-interface-attributes:inventory-ref": {
+                "port-ref": "TenGigE0/1/0/0"
               },
-              {
-                "name": "TenGigE0/1/0/1",
-                "type": "iana-if-type:ethernetCsmacd",
-                "admin-status": "up",
-                "oper-status": "up",
-                "higher-layer-if": [
-                  "Bundle-Ether10"
-                ],
-                "lower-layer-if": [],
-                "example-device-interface-attributes:mtu": 9216,
-                "example-device-interface-attributes:duplex-mode": "full-duplex",
-                "example-device-interface-attributes:service-state": "in-service",
-                "example-device-interface-attributes:floating": false
+              "example-device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.bt.uk",
+                  "tp-ref": "TenGigE0/1/0/0"
+                }
+              ]
+            },
+            {
+              "name": "TenGigE0/1/0/1",
+              "type": "iana-if-type:ethernetCsmacd",
+              "admin-status": "up",
+              "oper-status": "up",
+              "higher-layer-if": [
+                "Bundle-Ether10"
+              ],
+              "lower-layer-if": [],
+              "example-device-interface-attributes:mtu": 9216,
+              "example-device-interface-attributes:duplex-mode": "full-duplex",
+              "example-device-interface-attributes:service-state": "in-service",
+              "example-device-interface-attributes:floating": false
+            },
+            {
+              "name": "Bundle-Ether10",
+              "type": "iana-if-type:ieee8023adLag",
+              "admin-status": "up",
+              "oper-status": "up",
+              "higher-layer-if": [],
+              "lower-layer-if": [
+                "TenGigE0/1/0/0",
+                "TenGigE0/1/0/1"
+              ],
+              "example-device-interface-attributes:mtu": 9216,
+              "example-device-interface-attributes:service-state": "in-service",
+              "example-device-interface-attributes:floating": false,
+              "example-device-interface-attributes:ip-address": [
+                "198.51.100.0"
+              ]
+            },
+            {
+              "name": "TenGigE0/2/0/0",
+              "type": "iana-if-type:ethernetCsmacd",
+              "admin-status": "up",
+              "oper-status": "up",
+              "higher-layer-if": [
+                "TenGigE0/2/0/0.100",
+                "TenGigE0/2/0/0.200",
+                "TenGigE0/2/0/0.300"
+              ],
+              "lower-layer-if": []
+            },
+            {
+              "name": "TenGigE0/2/0/0.100",
+              "type": "iana-if-type:l2vlan",
+              "admin-status": "up",
+              "oper-status": "up",
+              "higher-layer-if": [],
+              "lower-layer-if": [
+                "TenGigE0/2/0/0"
+              ],
+              "example-device-interface-attributes:vlan-id": 100,
+              "example-device-interface-attributes:service-state": "in-service",
+              "example-device-interface-attributes:floating": false,
+              "example-device-interface-attributes:ip-address": [
+                "192.0.2.1"
+              ]
+            },
+            {
+              "name": "TenGigE0/2/0/1",
+              "type": "iana-if-type:ethernetCsmacd",
+              "admin-status": "down",
+              "oper-status": "down",
+              "higher-layer-if": [],
+              "lower-layer-if": [],
+              "example-device-interface-attributes:mtu": 1500,
+              "example-device-interface-attributes:duplex-mode": "full-duplex",
+              "example-device-interface-attributes:service-state": "out-of-service",
+              "example-device-interface-attributes:floating": true,
+              "example-device-interface-attributes:inventory-ref": {
+                "port-ref": "TenGigE0/2/0/1"
               },
-              {
-                "name": "Bundle-Ether10",
-                "type": "iana-if-type:ieee8023adLag",
-                "admin-status": "up",
-                "oper-status": "up",
-                "higher-layer-if": [],
-                "lower-layer-if": [
-                  "TenGigE0/1/0/0",
-                  "TenGigE0/1/0/1"
-                ],
-                "example-device-interface-attributes:mtu": 9216,
-                "example-device-interface-attributes:service-state": "in-service",
-                "example-device-interface-attributes:floating": false,
-                "example-device-interface-attributes:ip-address": [
-                  "198.51.100.0"
-                ]
-              },
-              {
-                "name": "TenGigE0/2/0/0",
-                "type": "iana-if-type:ethernetCsmacd",
-                "admin-status": "up",
-                "oper-status": "up",
-                "higher-layer-if": [
-                  "TenGigE0/2/0/0.100",
-                  "TenGigE0/2/0/0.200",
-                  "TenGigE0/2/0/0.300"
-                ],
-                "lower-layer-if": []
-              },
-              {
-                "name": "TenGigE0/2/0/0.100",
-                "type": "iana-if-type:l2vlan",
-                "admin-status": "up",
-                "oper-status": "up",
-                "higher-layer-if": [],
-                "lower-layer-if": [
-                  "TenGigE0/2/0/0"
-                ],
-                "example-device-interface-attributes:vlan-id": 100,
-                "example-device-interface-attributes:service-state": "in-service",
-                "example-device-interface-attributes:floating": false,
-                "example-device-interface-attributes:ip-address": [
-                  "192.0.2.1"
-                ]
-              },
-              {
-                "name": "TenGigE0/2/0/1",
-                "type": "iana-if-type:ethernetCsmacd",
-                "admin-status": "down",
-                "oper-status": "down",
-                "higher-layer-if": [],
-                "lower-layer-if": [],
-                "example-device-interface-attributes:mtu": 1500,
-                "example-device-interface-attributes:duplex-mode": "full-duplex",
-                "example-device-interface-attributes:service-state": "out-of-service",
-                "example-device-interface-attributes:floating": true,
-                "example-device-interface-attributes:inventory-ref": {
-                  "port-ref": "TenGigE0/2/0/1"
-                },
-                "example-device-interface-attributes:notes": "Inventory-only physical port; no topology termination point or link"
-              }
-            ]
-          }
+              "example-device-interface-attributes:notes": "Inventory-only physical port; no topology termination point or link"
+            }
+          ]
         }
       }
     ]
@@ -1107,9 +1035,11 @@ a companion file set:
 
 These files are not reproduced in full here for length. They are
 companion working artifacts; this individual draft does not assign
-a stable public artifact URL. The mounted YANG module, worked fixture,
-and protobuf schema need to be updated to reflect the removal of the
-per-interface inventory "ne-ref".
+a stable public artifact URL. The parent YANG module and worked fixture
+need to be updated to reflect the renamed top-level container and the
+mount point on the device list. The mounted YANG module, worked fixture,
+and protobuf schema also need to be updated to reflect the removal of
+the per-interface inventory "ne-ref".
 
 Table 1 summarizes RouterB's interfaces and their representation in
 the source inventory and topology data.
@@ -1163,8 +1093,8 @@ Table 1: RouterB interfaces vs. existing models
 
 - Renamed the mount-point parent container from "device-root" to
   "interfaces-root" so the container identifier and the
-  mount-point label are no longer the same string. The
-  mount-point label itself remains "device-root".
+  mount-point label were no longer the same string. In -01, the
+  mount-point label remained "device-root".
 
 - Explicitly marked the operational-state leaves
   ("current-alarm-severity", "alarm-ref", "floating")
@@ -1313,7 +1243,9 @@ module in Section 6 and the tree diagram in Section 5.2; the
 "deferred" items are recorded here so a future revision does not
 have to repeat this comparison from scratch.
 
-# Appendix F.  OpenConfig Interface Layering
+# Appendix F.  OpenConfig Comparisons
+
+## F.1.  Interface Layering
 
 The bidirectional LAG/VLAN stacking design in Section 5.1 is
 validated by real-world experience in OpenConfig: when
@@ -1333,7 +1265,77 @@ generic mechanism instead of a LAG-specific one so that the same
 sub-interfaces and other interface-type stacking without a
 separate leaf per interface type.
 
+## F.2.  Attribute Comparisons
+
+The following comparisons identify related OpenConfig leaves and
+cases for which no direct counterpart was identified:
+
+- "inventory-ref/port-ref": openconfig-platform-port's
+  "hardware-port" leaf provides a similar per-device binding.
+
+- "topology-ref": no stored interface-level topology reference was
+  identified.
+
+- "vlan-id": openconfig-vlan defines
+  "/interfaces/interface/subinterfaces/subinterface/vlan/match/
+  single-tagged/config/vlan-id", with the same range (1-4094).
+
+- "ip-address": openconfig-if-ip defines
+  "/interfaces/interface/subinterfaces/subinterface/ipv4/addresses/
+  address/config/ip" for IPv4 addresses.
+
+- "mtu": openconfig-interfaces defines
+  "/interfaces/interface/config/mtu" as uint16, matching this
+  document's type.
+
+- "duplex-mode": openconfig-if-ethernet defines
+  "/interfaces/interface/ethernet/config/duplex-mode" with FULL and
+  HALF values, and models auto-negotiation separately with
+  "auto-negotiate". This document's "auto" value is a convenience
+  for servers that have not yet resolved a negotiated duplex.
+
+- "direction": no single generic leaf was identified. A related
+  concept is the client/line role in an openconfig-terminal-device
+  logical-channel-assignments entry for optical transport.
+
+- "layer-rate": openconfig-terminal-device defines
+  "/terminal-device/logical-channels/channel/config/
+  {rate-class,trib-protocol}" with identityref values such as
+  PROT_OTU4 and PROT_ODU4.
+
+- "service-state": no interface-scoped counterpart was identified.
+
+- "floating": no equivalent boolean was identified. An absent
+  openconfig-platform-port "hardware-port" indicates no port binding;
+  it does not establish whether an interface has topology references.
+
+- "notes": no counterpart was identified for this unstructured field.
+
 # Author's Address
+
+# Appendix G.  SNMP MIB Object Mapping (Informative)
+
+This appendix lists, for each augmentation node, a commonly referenced
+SNMP object that carries related information in deployed implementations.
+This mapping is informative and does not constrain implementations.
+
+```text
+   +================+=============================+================+
+   | Node(s)        | Closest SNMP object         | Notes          |
+   +================+=============================+================+
+   | inventory-ref  | ENTITY-MIB entAliasMapping* | ifIndex -> ent |
+   | topology-ref   | none                        |                |
+   | vlan-id        | Q-BRIDGE-MIB dot1qVlan*     | not IF-MIB      |
+   | ip-address     | IP-MIB ipAddressIfIndex     |                |
+   | mtu            | IF-MIB ifMtu                | not in RFC8343  |
+   | duplex-mode    | EtherLike-MIB dot3StatsDuplexStatus | not IF-MIB |
+   | direction      | none                        |                |
+   | layer-rate     | none                        |                |
+   | service-state  | none                        |                |
+   | floating       | none                        |                |
+   | notes          | none                        |                |
+   +================+=============================+================+
+```
 
 TBD
 Email: TBD
