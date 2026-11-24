@@ -210,7 +210,7 @@ network-interface-inventory
 
 ## 5.2.  Tree Diagram
 
-Parent schema module: example-device-interface-inventory
+Parent schema module: inventory-network-interfaces
 
 ```text
   +--ro network-interface-inventory
@@ -296,15 +296,15 @@ strings: RFC 8528 confines mounted paths to the mount jail unless a
 server configures shared-schema parent-reference metadata. This
 proposal does not require parent-reference metadata.
 
-## 6.1.  Parent module: example-device-interface-inventory
+## 6.1.  Parent module: inventory-network-interfaces
 
-&lt;CODE BEGINS&gt; file "example-device-interface-inventory@2026-10-29.yang"
+&lt;CODE BEGINS&gt; file "inventory-network-interfaces@2026-10-29.yang"
 
 ```yang
-module example-device-interface-inventory {
+module inventory-network-interfaces {
   yang-version 1.1;
-  namespace "urn:example:ns:yang:example-device-interface-inventory";
-  prefix "edii";
+  namespace "urn:example:ns:yang:inventory-network-interfaces";
+  prefix "inii";
 
   import ietf-yang-schema-mount { prefix yangmnt; }
   import ietf-network-inventory { prefix nei; }
@@ -394,7 +394,7 @@ module example-device-interface-attributes {
     "Read-only augmentation of a mounted ietf-interfaces schema for
      device-scoped interface inventory. This module is intended to be
      included in the mounted schema set at the interfaces-root mount point
-     defined by example-device-interface-inventory.
+     defined by inventory-network-interfaces.
 
      RFC 8528 confines a mounted schema to its mount jail. Therefore,
      inventory-ref and topology-ref values are correlation identifiers
@@ -594,7 +594,7 @@ against the mounted interfaces container. URI path key values MUST
 be percent-encoded when they contain reserved characters:
 
 ```http
-   GET /restconf/data/example-device-interface-inventory:\
+   GET /restconf/data/inventory-network-interfaces:\
        network-interface-inventory/device=RouterB.subdomain1.region3.bt.uk/\
        ietf-interfaces:interfaces
 ```
@@ -609,7 +609,7 @@ context; it is not the literal body of this subtree GET.
 ## 7.2.  Retrieve a Single Interface
 
 ```http
-   GET /restconf/data/example-device-interface-inventory:\
+   GET /restconf/data/inventory-network-interfaces:\
        network-interface-inventory/device=RouterB.subdomain1.region3.bt.uk/\
        ietf-interfaces:interfaces/\
        interface=Bundle-Ether10
@@ -630,7 +630,7 @@ RESTCONF/JSON (RFC 7951) is the canonical encoding for this
 document's data model, but some clients -- in particular gRPC-
 based telemetry and streaming consumers -- prefer a typed binary
 wire format. A non-normative Protocol Buffers (proto3) schema,
-"example-device-interface-inventory-02.proto", is published
+"inventory-network-interfaces-02.proto", is published
 alongside this document.
 
 Relationship to gNMI.  gNMI (gRPC Network Management Interface,
@@ -696,7 +696,7 @@ ietf-interfaces defines it using the YANG binary type.
 
 ```json
    {
-  "example-device-interface-inventory:network-interface-inventory": {
+  "inventory-network-interfaces:network-interface-inventory": {
     "device": [
       {
         "ne-ref": "RouterB.subdomain1.region3.bt.uk",
@@ -1028,9 +1028,9 @@ a companion file set:
    03-l2-topology.json
    04-l3-topology.json
    05-device-interfaces-schema-mount-v4.json   (worked fixture)
-   example-device-interface-inventory@2026-10-29.yang (parent)
+   inventory-network-interfaces@2026-10-29.yang (parent)
    example-device-interface-attributes@2026-10-29.yang (mounted)
-   example-device-interface-inventory-03.proto (Section 7.4)
+   inventory-network-interfaces-03.proto (Section 7.4)
 ```
 
 These files are not reproduced in full here for length. They are
@@ -1064,7 +1064,7 @@ Table 1: RouterB interfaces vs. existing models
 # Appendix B.  Changes from -00
 
 - Renamed the module from "ietf-device-interface-inventory" to
-  "example-device-interface-inventory" and changed the namespace
+  "inventory-network-interfaces" and changed the namespace
   from "urn:ietf:params:xml:ns:yang:..." to
   "urn:example:ns:yang:...", per RFC 8407 Sections 4.1 and 4.8
   (reserved IETF prefixes). The "ietf-" prefix will be
