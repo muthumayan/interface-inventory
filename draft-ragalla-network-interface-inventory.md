@@ -218,11 +218,11 @@ Parent schema module: inventory-network-interfaces
         +--ro ne-ref             -> /nei:network-inventory/.../ne-id
         +--mp interfaces-root
            (mounted schema set includes ietf-interfaces and
-            example-device-interface-attributes)
+            device-interface-attributes)
 ```
 
 Mounted schema augmentation module:
-example-device-interface-attributes
+device-interface-attributes
 
 ```text
   augment /if:interfaces/if:interface:
@@ -284,7 +284,7 @@ mappings are in Appendices E, F, and G.
 The model is split to respect RFC 8528 mount-jail semantics. The
 parent module is loaded in the management system's parent schema.
 At each mount point, the server advertises a mounted schema set that
-includes ietf-interfaces and example-device-interface-attributes.
+includes ietf-interfaces and device-interface-attributes.
 The same mounted module set MAY be shared by all devices when their
 schemas are identical. The server MUST publish the applicable
 mount-point schema through RFC 8528 schema-mount data and the YANG
@@ -316,7 +316,7 @@ module inventory-network-interfaces {
     "Parent data model for a device-scoped interface inventory facade.
      It identifies a network element and defines an RFC 8528 schema
      mount point where the mounted schema set contains ietf-interfaces
-     and example-device-interface-attributes.
+     and device-interface-attributes.
 
      The module does not define an HTTP API. A server may expose the
      device list and mounted interface data through NETCONF, RESTCONF,
@@ -351,7 +351,7 @@ module inventory-network-interfaces {
          inline or shared-schema entry as appropriate. For this
          read-only inventory view, the schema-mount config value MUST
          be false. The mounted module set MUST include ietf-interfaces
-         and example-device-interface-attributes.";
+         and device-interface-attributes.";
 
       leaf ne-ref {
         type leafref {
@@ -374,14 +374,14 @@ module inventory-network-interfaces {
 
 &lt;CODE ENDS&gt;
 
-## 6.2.  Mounted augmentation: example-device-interface-attributes
+## 6.2.  Mounted augmentation: device-interface-attributes
 
-&lt;CODE BEGINS&gt; file "example-device-interface-attributes@2026-10-29.yang"
+&lt;CODE BEGINS&gt; file "device-interface-attributes@2026-10-29.yang"
 
 ```yang
-module example-device-interface-attributes {
+module device-interface-attributes {
   yang-version 1.1;
-  namespace "urn:example:ns:yang:example-device-interface-attributes";
+  namespace "urn:example:ns:yang:device-interface-attributes";
   prefix "edia";
 
   import ietf-interfaces  { prefix if; }
@@ -714,14 +714,14 @@ ietf-interfaces defines it using the YANG binary type.
                 "Bundle-Ether10"
               ],
               "lower-layer-if": [],
-              "example-device-interface-attributes:mtu": 9216,
-              "example-device-interface-attributes:duplex-mode": "full-duplex",
-              "example-device-interface-attributes:service-state": "in-service",
-              "example-device-interface-attributes:floating": false,
-              "example-device-interface-attributes:inventory-ref": {
+              "device-interface-attributes:mtu": 9216,
+              "device-interface-attributes:duplex-mode": "full-duplex",
+              "device-interface-attributes:service-state": "in-service",
+              "device-interface-attributes:floating": false,
+              "device-interface-attributes:inventory-ref": {
                 "port-ref": "TenGigE0/1/0/0"
               },
-              "example-device-interface-attributes:topology-ref": [
+              "device-interface-attributes:topology-ref": [
                 {
                   "network-ref": "mobilecore.region3.l2",
                   "node-ref": "RouterB.subdomain1.region3.bt.uk",
@@ -738,10 +738,10 @@ ietf-interfaces defines it using the YANG binary type.
                 "Bundle-Ether10"
               ],
               "lower-layer-if": [],
-              "example-device-interface-attributes:mtu": 9216,
-              "example-device-interface-attributes:duplex-mode": "full-duplex",
-              "example-device-interface-attributes:service-state": "in-service",
-              "example-device-interface-attributes:floating": false
+              "device-interface-attributes:mtu": 9216,
+              "device-interface-attributes:duplex-mode": "full-duplex",
+              "device-interface-attributes:service-state": "in-service",
+              "device-interface-attributes:floating": false
             },
             {
               "name": "Bundle-Ether10",
@@ -753,10 +753,10 @@ ietf-interfaces defines it using the YANG binary type.
                 "TenGigE0/1/0/0",
                 "TenGigE0/1/0/1"
               ],
-              "example-device-interface-attributes:mtu": 9216,
-              "example-device-interface-attributes:service-state": "in-service",
-              "example-device-interface-attributes:floating": false,
-              "example-device-interface-attributes:ip-address": [
+              "device-interface-attributes:mtu": 9216,
+              "device-interface-attributes:service-state": "in-service",
+              "device-interface-attributes:floating": false,
+              "device-interface-attributes:ip-address": [
                 "198.51.100.0"
               ]
             },
@@ -781,10 +781,10 @@ ietf-interfaces defines it using the YANG binary type.
               "lower-layer-if": [
                 "TenGigE0/2/0/0"
               ],
-              "example-device-interface-attributes:vlan-id": 100,
-              "example-device-interface-attributes:service-state": "in-service",
-              "example-device-interface-attributes:floating": false,
-              "example-device-interface-attributes:ip-address": [
+              "device-interface-attributes:vlan-id": 100,
+              "device-interface-attributes:service-state": "in-service",
+              "device-interface-attributes:floating": false,
+              "device-interface-attributes:ip-address": [
                 "192.0.2.1"
               ]
             },
@@ -795,14 +795,14 @@ ietf-interfaces defines it using the YANG binary type.
               "oper-status": "down",
               "higher-layer-if": [],
               "lower-layer-if": [],
-              "example-device-interface-attributes:mtu": 1500,
-              "example-device-interface-attributes:duplex-mode": "full-duplex",
-              "example-device-interface-attributes:service-state": "out-of-service",
-              "example-device-interface-attributes:floating": true,
-              "example-device-interface-attributes:inventory-ref": {
+              "device-interface-attributes:mtu": 1500,
+              "device-interface-attributes:duplex-mode": "full-duplex",
+              "device-interface-attributes:service-state": "out-of-service",
+              "device-interface-attributes:floating": true,
+              "device-interface-attributes:inventory-ref": {
                 "port-ref": "TenGigE0/2/0/1"
               },
-              "example-device-interface-attributes:notes": "Inventory-only physical port; no topology termination point or link"
+              "device-interface-attributes:notes": "Inventory-only physical port; no topology termination point or link"
             }
           ]
         }
@@ -1029,7 +1029,7 @@ a companion file set:
    04-l3-topology.json
    05-device-interfaces-schema-mount-v4.json   (worked fixture)
    inventory-network-interfaces@2026-10-29.yang (parent)
-   example-device-interface-attributes@2026-10-29.yang (mounted)
+   device-interface-attributes@2026-10-29.yang (mounted)
    inventory-network-interfaces-03.proto (Section 7.4)
 ```
 
