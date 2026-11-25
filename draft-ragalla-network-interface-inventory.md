@@ -255,7 +255,8 @@ information:
   to dereference topology termination points to retrieve a VLAN tag.
 
 - Additional operational attributes and annotations not defined by the
-  base interface model.
+  base interface model. Interface capacity is available via
+  RFC 8343 (ietf-interfaces) 'speed' (if:speed).
 
 Normative definitions for the augmentation are in the YANG modules in
 Section 6. Examples are in Appendix A. Informative comparisons and
