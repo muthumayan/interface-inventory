@@ -170,10 +170,13 @@ RFC 8346, RFC 8944, or the IVY drafts.
     identifiers for the RFC 8345 network/node/termination-point
     views corresponding to the interface; and
 
-  - "vlan-id" and "ip-address" convenience leaves populated
-    from the corresponding RFC 8944/RFC 8346-style topology
-    attributes, so a client does not have to dereference
-    "topology-ref" just to read a VLAN tag or an IP address.
+  - a "vlan-id" convenience leaf populated from the corresponding
+    RFC 8944-style topology attributes, so a client does not have to
+    dereference "topology-ref" just to read a VLAN tag.
+
+  - IP addressing and per-family MTU are represented using RFC 8344
+    (ietf-ip) within the mounted schema set, rather than being
+    duplicated as additional augmentation leaves.
 
 - "higher-layer-if" and "lower-layer-if" are NOT redefined; they
   are inherited unmodified from RFC 8343. The server populates
@@ -217,7 +220,7 @@ Parent schema module: inventory-network-interfaces
      +--ro device* [ne-ref]
         +--ro ne-ref             -> /nei:network-inventory/.../ne-id
         +--mp interfaces-root
-           (mounted schema set includes ietf-interfaces and
+           (mounted schema set includes ietf-interfaces, ietf-ip, and
             device-interface-attributes)
 ```
 
@@ -233,8 +236,6 @@ device-interface-attributes
     |  +--ro node-ref       string
     |  +--ro tp-ref         string
     +--ro vlan-id?                  uint16
-    +--ro ip-address*               inet:ip-address
-    +--ro mtu?                      uint16
     +--ro duplex-mode?              enumeration
     +--ro direction?                enumeration
     +--ro layer-rate?               string
@@ -252,7 +253,7 @@ information:
   inventory and topology views.
 
 - Convenience leaves derived from topology data, so clients do not need
-  to dereference topology termination points to retrieve common values.
+  to dereference topology termination points to retrieve a VLAN tag.
 
 - Additional operational attributes and annotations not defined by the
   base interface model.
@@ -268,8 +269,6 @@ mappings are in Appendices E, F, and G.
    | inventory-ref  | Correlate to inventory port  |
    | topology-ref   | Correlate to topology TP(s)  |
    | vlan-id        | Convenience VLAN tag         |
-   | ip-address     | Convenience IP address       |
-   | mtu            | Augmented attribute          |
    | duplex-mode    | Augmented attribute          |
    | direction      | Augmented attribute          |
    | layer-rate     | Augmented attribute          |
@@ -284,7 +283,7 @@ mappings are in Appendices E, F, and G.
 The model is split to respect RFC 8528 mount-jail semantics. The
 parent module is loaded in the management system's parent schema.
 At each mount point, the server advertises a mounted schema set that
-includes ietf-interfaces and device-interface-attributes.
+includes ietf-interfaces, ietf-ip, and device-interface-attributes.
 The same mounted module set MAY be shared by all devices when their
 schemas are identical. The server MUST publish the applicable
 mount-point schema through RFC 8528 schema-mount data and the YANG
@@ -315,12 +314,20 @@ module inventory-network-interfaces {
   description
     "Parent data model for a device-scoped interface inventory facade.
      It identifies a network element and defines an RFC 8528 schema
-     mount point where the mounted schema set contains ietf-interfaces
-     and device-interface-attributes.
+     mount point where the mounted schema set contains ietf-interfaces,
+     ietf-ip, and device-interface-attributes.
 
      The module does not define an HTTP API. A server may expose the
      device list and mounted interface data through NETCONF, RESTCONF,
      or another management interface.";
+
+  revision 2026-11-24 {
+    description
+      "-04 revision. Removes ip-address and mtu augmentation leaves;
+       relies on RFC 8344 (ietf-ip) for interface IP addressing and
+       per-family MTU within the mounted schema set.";
+    reference "draft-ragalla-network-interface-inventory";
+  }
 
   revision 2026-10-29 {
     description
@@ -350,8 +357,8 @@ module inventory-network-interfaces {
          mounted schema through RFC 8528 schema-mounts data, using an
          inline or shared-schema entry as appropriate. For this
          read-only inventory view, the schema-mount config value MUST
-         be false. The mounted module set MUST include ietf-interfaces
-         and device-interface-attributes.";
+         be false. The mounted module set MUST include ietf-interfaces,
+         ietf-ip, and device-interface-attributes.";
 
       leaf ne-ref {
         type leafref {
@@ -376,7 +383,7 @@ module inventory-network-interfaces {
 
 ## 6.2.  Mounted augmentation: device-interface-attributes
 
-&lt;CODE BEGINS&gt; file "device-interface-attributes@2026-10-29.yang"
+&lt;CODE BEGINS&gt; file "device-interface-attributes@2026-11-24.yang"
 
 ```yang
 module device-interface-attributes {
@@ -385,7 +392,6 @@ module device-interface-attributes {
   prefix "edia";
 
   import ietf-interfaces  { prefix if; }
-  import ietf-inet-types  { prefix inet; }
 
   organization "TBD";
   contact "TBD";
@@ -400,6 +406,14 @@ module device-interface-attributes {
      inventory-ref and topology-ref values are correlation identifiers
      represented as strings; the mounted module does not use leafrefs
      that cross into the parent inventory or topology schema.";
+
+  revision 2026-11-24 {
+    description
+      "-04 revision. Removes ip-address and mtu augmentation leaves;
+       relies on RFC 8344 (ietf-ip) for interface IP addressing and
+       per-family MTU within the mounted schema set.";
+    reference "draft-ragalla-network-interface-inventory";
+  }
 
   revision 2026-10-29 {
     description
@@ -467,7 +481,9 @@ module device-interface-attributes {
     description
       "Adds read-only inventory/topology correlations and commonly
        needed interface attributes to the mounted RFC 8343 interface
-       list. The base ietf-interfaces module remains unchanged.";
+       list. IP addressing and per-family MTU are represented using
+       RFC 8344 (ietf-ip) when that module is included in the mounted
+       schema set. The base ietf-interfaces module remains unchanged.";
 
     container inventory-ref {
       config false;
@@ -493,25 +509,6 @@ module device-interface-attributes {
       reference
         "RFC 8944; openconfig-vlan single-tagged vlan-id";
     }
-
-    leaf-list ip-address {
-      config false;
-      type inet:ip-address;
-      description
-        "IP addresses associated with this interface in the relevant
-         L3 interface/topology model.";
-      reference
-        "RFC 8346; RFC 4293 IP-MIB; openconfig-if-ip";
-    }
-
-    leaf mtu {
-      config false;
-      type uint16;
-      description "Maximum transmission unit, in octets.";
-      reference
-        "RFC 2863 IF-MIB ifMtu; RFC 8343, Sec. 4 (ifMtu not mapped to ietf-interfaces); openconfig-interfaces mtu";
-    }
-
     leaf duplex-mode {
       config false;
       type enumeration {
@@ -844,9 +841,9 @@ a companion file set:
    02-ivy-inventory-topology.json
    03-l2-topology.json
    04-l3-topology.json
-   05-device-interfaces-schema-mount-v4.json   (worked fixture)
+   05-network-interfaces-schema-mount-v4.json   (worked fixture)
    inventory-network-interfaces@2026-10-29.yang (parent)
-   device-interface-attributes@2026-10-29.yang (mounted)
+   device-interface-attributes@2026-11-24.yang (mounted)
    inventory-network-interfaces-03.proto (Section 7.4)
 ```
 
@@ -885,12 +882,12 @@ parent data-tree shape using the worked example in this appendix. It
 is a fixture, not the literal body of the subtree GET in Section
 7.1; that GET returns the inner "ietf-interfaces:interfaces"
 resource representation. The complete three-router fixture is
-identified as "05-device-interfaces-schema-mount-v4.json"; that
+identified as "05-network-interfaces-schema-mount-v4.json"; that
 companion fixture needs to be updated to match this revision.
 
 The topology relationships and documented-prefix IP addresses come
 from the synthetic source payloads. The if-index, MAC address,
-admin/oper states, MTU, duplex, and service-state values are
+admin/oper states, duplex, and service-state values are
 illustrative placeholders, not measurements from a live device.
 In the RFC 7951 encoding below, phys-address is base64 because
 ietf-interfaces defines it using the YANG binary type.
@@ -915,7 +912,6 @@ ietf-interfaces defines it using the YANG binary type.
                 "Bundle-Ether10"
               ],
               "lower-layer-if": [],
-              "device-interface-attributes:mtu": 9216,
               "device-interface-attributes:duplex-mode": "full-duplex",
               "device-interface-attributes:service-state": "in-service",
               "device-interface-attributes:floating": false,
@@ -939,7 +935,6 @@ ietf-interfaces defines it using the YANG binary type.
                 "Bundle-Ether10"
               ],
               "lower-layer-if": [],
-              "device-interface-attributes:mtu": 9216,
               "device-interface-attributes:duplex-mode": "full-duplex",
               "device-interface-attributes:service-state": "in-service",
               "device-interface-attributes:floating": false
@@ -954,12 +949,17 @@ ietf-interfaces defines it using the YANG binary type.
                 "TenGigE0/1/0/0",
                 "TenGigE0/1/0/1"
               ],
-              "device-interface-attributes:mtu": 9216,
               "device-interface-attributes:service-state": "in-service",
               "device-interface-attributes:floating": false,
-              "device-interface-attributes:ip-address": [
-                "198.51.100.0"
-              ]
+              "ietf-ip:ipv4": {
+                "mtu": 9216,
+                "address": [
+                  {
+                    "ip": "198.51.100.0",
+                    "prefix-length": 32
+                  }
+                ]
+              }
             },
             {
               "name": "TenGigE0/2/0/0",
@@ -985,9 +985,15 @@ ietf-interfaces defines it using the YANG binary type.
               "device-interface-attributes:vlan-id": 100,
               "device-interface-attributes:service-state": "in-service",
               "device-interface-attributes:floating": false,
-              "device-interface-attributes:ip-address": [
-                "192.0.2.1"
-              ]
+              "ietf-ip:ipv4": {
+                "mtu": 1500,
+                "address": [
+                  {
+                    "ip": "192.0.2.1",
+                    "prefix-length": 24
+                  }
+                ]
+              }
             },
             {
               "name": "TenGigE0/2/0/1",
@@ -996,7 +1002,6 @@ ietf-interfaces defines it using the YANG binary type.
               "oper-status": "down",
               "higher-layer-if": [],
               "lower-layer-if": [],
-              "device-interface-attributes:mtu": 1500,
               "device-interface-attributes:duplex-mode": "full-duplex",
               "device-interface-attributes:service-state": "out-of-service",
               "device-interface-attributes:floating": true,
@@ -1017,10 +1022,11 @@ Note how "higher-layer-if"/"lower-layer-if" give the LAG<->member
 and VLAN<->parent relationships directly, in both directions, with
 no topology-network traversal required; "inventory-ref" and
 "topology-ref" remain available for clients that still need to
-correlate back into inventory or topology views. "mtu",
-"duplex-mode", "service-state", and "floating" (Appendix E)
-provide commonly needed attributes that RFC 8343 does not define
-in its base module.
+correlate back into inventory or topology views. "duplex-mode",
+"service-state", and "floating" (Appendix E) provide commonly
+needed attributes that RFC 8343 does not define in its base module.
+IP addressing and per-family MTU are shown using RFC 8344 (ietf-ip)
+within the same mounted interface entries.
 
 The "TenGigE0/2/0/1" entry illustrates that "floating" can be
 "true" (no topology-ref entries) while "inventory-ref" remains
@@ -1279,13 +1285,10 @@ cases for which no direct counterpart was identified:
   "/interfaces/interface/subinterfaces/subinterface/vlan/match/
   single-tagged/config/vlan-id", with the same range (1-4094).
 
-- "ip-address": openconfig-if-ip defines
-  "/interfaces/interface/subinterfaces/subinterface/ipv4/addresses/
-  address/config/ip" for IPv4 addresses.
-
-- "mtu": openconfig-interfaces defines
-  "/interfaces/interface/config/mtu" as uint16, matching this
-  document's type.
+- IP addressing and per-family MTU are represented using RFC 8344
+  (ietf-ip) rather than as additional augmentation leaves. OpenConfig
+  models interface IP configuration under openconfig-if-ip, and models
+  interface MTU under openconfig-interfaces.
 
 - "duplex-mode": openconfig-if-ethernet defines
   "/interfaces/interface/ethernet/config/duplex-mode" with FULL and
@@ -1325,8 +1328,6 @@ This mapping is informative and does not constrain implementations.
    | inventory-ref  | ENTITY-MIB entAliasMapping* | ifIndex -> ent |
    | topology-ref   | none                        |                |
    | vlan-id        | Q-BRIDGE-MIB dot1qVlan*     | not IF-MIB      |
-   | ip-address     | IP-MIB ipAddressIfIndex     |                |
-   | mtu            | IF-MIB ifMtu                | not in RFC8343  |
    | duplex-mode    | EtherLike-MIB dot3StatsDuplexStatus | not IF-MIB |
    | direction      | none                        |                |
    | layer-rate     | none                        |                |
