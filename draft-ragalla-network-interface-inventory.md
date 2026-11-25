@@ -258,7 +258,7 @@ information:
   base interface model.
 
 Normative definitions for the augmentation are in the YANG modules in
-Section 6. Examples are in Section 8. Informative comparisons and
+Section 6. Examples are in Appendix A. Informative comparisons and
 mappings are in Appendices E, F, and G.
 
 ```text
@@ -603,7 +603,7 @@ The response representation is the mounted
 "ietf-interfaces:interfaces" subtree plus augmentation data.
 The requested device key supplies the network-element context for
 any "inventory-ref/port-ref" in that subtree.
-Section 8.1 shows a shortened full parent data-tree fixture for
+Appendix A.1 shows a shortened full parent data-tree fixture for
 context; it is not the literal body of this subtree GET.
 
 ## 7.2.  Retrieve a Single Interface
@@ -675,12 +675,213 @@ modules in Section 6 are authoritative if the representations
 differ. Any companion protobuf schema needs to be updated to reflect
 the removal of the per-interface inventory "ne-ref".
 
-# 8.  Examples
+# 9.  Security Considerations
 
-## 8.1.  Example: LAG, LAG Members, and VLAN Sub-Interfaces
+The parent device list exposes device identifiers and interface
+inventory relationships. Implementations MUST apply authorization
+to both the parent device list and every mounted interface schema.
+Access control on a parent data node does not by itself establish
+the same policy for mounted data. Servers MUST configure and test
+access control for mounted instances in accordance with RFC 8528
+and the Network Configuration Access Control Model (NACM, RFC 8341).
+
+The YANG augmentation modules defined here are operational/read-only
+(their added nodes are config false). The mounted ietf-interfaces
+schema itself contains both configuration and operational-state
+nodes; this document does not claim that the whole mounted schema
+is config false. A GET-only facade MUST reject write methods unless
+a separate write contract and authorization policy are specified.
+
+Interface identifiers, topology relationships, and device inventory
+can be sensitive network information. Implementations SHOULD limit
+access by user, tenant, and device scope, protect RESTCONF/API
+transport with TLS, and apply equivalent authorization to streamed
+events and unary reads.
+
+# 10.  IANA Considerations
+
+This document has no IANA actions. The "urn:example" namespaces
+and "example-" module names are placeholders for this individual
+draft. If the work is adopted by an IETF working group, final
+namespaces and module names will be selected and appropriate
+registrations requested in a later revision.
+
+# 11.  References
+
+## 11.1.  Normative References
+
+[RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+[RFC6991]  Schoenwaelder, J., Ed., "Common YANG Data Types",
+RFC 6991, July 2013.
+
+[RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling
+Language", RFC 7950, August 2016.
+
+[RFC7951]  Lhotka, L., "JSON Encoding of Data Modeled with YANG",
+RFC 7951, August 2016.
+
+[RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
+Protocol", RFC 8040, January 2017.
+
+[RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+2119 Key Words", BCP 14, RFC 8174, May 2017.
+
+[RFC8340]  Bjorklund, M. and L. Berger, Ed., "YANG Tree
+Diagrams", BCP 215, RFC 8340, March 2018.
+
+[RFC8341]  Bierman, A. and M. Bjorklund, "Network Configuration
+Access Control Model", STD 91, RFC 8341, March 2018.
+
+[RFC8343]  Bjorklund, M., "A YANG Data Model for Interface
+Management", RFC 8343, March 2018.
+
+[RFC8345]  Clemm, A., Medved, J., Varga, R., Bahadur, N.,
+Ananthakrishnan, H., and X. Liu, "A YANG Data Model
+for Network Topologies", RFC 8345, March 2018.
+
+[RFC8407]  Bierman, A., "Guidelines for Authors and Reviewers of
+Documents Containing YANG Data Models", BCP 216,
+RFC 8407, October 2018.
+
+[RFC8525]  Bierman, A., Bjorklund, M., and K. Watsen, "YANG
+Library", RFC 8525, March 2019.
+
+[RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
+RFC 8528, March 2019.
+
+## 11.2.  Informative References
+
+[RFC8346]  Clemm, A., Medved, J., Varga, R., Liu, X.,
+Ananthakrishnan, H., and N. Bahadur, "A YANG Data
+Model for Layer 3 Topologies", RFC 8346, March 2018.
+
+[RFC8944]  Dong, J., Wei, X., Wu, Q., Boucadair, M., and A.
+Liu, "A YANG Data Model for Layer 2 Network
+Topologies", RFC 8944, November 2020.
+
+[IVY-INVENTORY]
+"A YANG Data Model for Network and Network Element
+Inventory", draft-ietf-ivy-network-inventory-yang-19
+(work in progress).
+
+[IVY-TOPOLOGY]
+"A YANG Data Model for Network Inventory Topology",
+draft-ietf-ivy-network-inventory-topology-11 (work in
+progress).
+
+[RFC2863]  McCloghrie, K. and F. Kastenholz, "The Interfaces
+Group MIB", RFC 2863, June 2000.  (IF-MIB)
+
+[RFC3635]  Flick, J., "Definitions of Managed Objects for the
+Ethernet-like Interface Types", RFC 3635,
+September 2003.  (EtherLike-MIB)
+
+[RFC4293]  Routhier, S., Ed., "Management Information Base for
+the Internet Protocol (IP)", RFC 4293, April 2006.
+(IP-MIB)
+
+[RFC4363]  Levi, D., Ed., and D. Harrington, Ed., "Definitions of
+Managed Objects for Bridges with Traffic Classes,
+Multicast Filtering, and Virtual LAN Extensions",
+RFC 4363, January 2006.  (Q-BRIDGE-MIB)
+
+[RFC6933]  Bierman, A., Romascanu, D., Quittek, J., and M.
+Chandramouli, "Entity MIB (Version 4)", RFC 6933,
+May 2013.  (ENTITY-MIB)
+
+[OC-INTERFACES]
+OpenConfig Working Group, "openconfig-interfaces.yang",
+OpenConfig public models repository
+(github.com/openconfig/public), 'mtu' leaf.
+
+[OC-ETHERNET]
+OpenConfig Working Group, "openconfig-if-ethernet.yang",
+OpenConfig public models repository, 'duplex-mode' and
+'auto-negotiate' leaves.
+
+[OC-AGGREGATE]
+OpenConfig Working Group, "openconfig-if-aggregate.yang",
+OpenConfig public models repository,
+'aggregation/state/member' and 'ethernet/config/
+aggregate-id' leaves.
+
+[OC-VLAN]  OpenConfig Working Group, "openconfig-vlan.yang",
+OpenConfig public models repository,
+'vlan/match/single-tagged/config/vlan-id' leaf.
+
+[OC-IF-IP] OpenConfig Working Group, "openconfig-if-ip.yang",
+OpenConfig public models repository,
+'ipv4/addresses/address/config/ip' leaf.
+
+[OC-TERMINAL-DEVICE]
+OpenConfig Working Group, "openconfig-terminal-device.
+yang", OpenConfig public models repository,
+'logical-channels/channel/config/{rate-class,
+trib-protocol}' leaves.
+
+[OC-PLATFORM-PORT]
+OpenConfig Working Group, "openconfig-platform-port.
+yang", OpenConfig public models repository,
+'hardware-port' leaf.
+
+[GNMI]     OpenConfig Working Group, "gRPC Network Management
+Interface (gNMI) Specification", OpenConfig public
+reference repository, gNMI specification.
+
+# Appendix A.  Full Worked Example (mobilecore.region3)
+
+The complete source data used to ground Appendix A.1 --
+three IOS XR routers, their IVY network-inventory, IVY
+inventory-topology, RFC 8944 L2 topology, and RFC 8346-style L3
+topology -- plus the full parent data-tree fixture from which the
+Section 7.1 mounted-subtree response is derived -- are published as
+a companion file set:
+
+```text
+   01-ivy-network-inventory.json
+   02-ivy-inventory-topology.json
+   03-l2-topology.json
+   04-l3-topology.json
+   05-device-interfaces-schema-mount-v4.json   (worked fixture)
+   inventory-network-interfaces@2026-10-29.yang (parent)
+   device-interface-attributes@2026-10-29.yang (mounted)
+   inventory-network-interfaces-03.proto (Section 7.4)
+```
+
+These files are not reproduced in full here for length. They are
+companion working artifacts; this individual draft does not assign
+a stable public artifact URL. The parent YANG module and worked fixture
+need to be updated to reflect the renamed top-level container and the
+mount point on the device list. The mounted YANG module, worked fixture,
+and protobuf schema also need to be updated to reflect the removal of
+the per-interface inventory "ne-ref".
+
+Table 1 summarizes RouterB's interfaces and their representation in
+the source inventory and topology data.
+
+```text
++=====================+===========+===============================+
+| Interface           | Type      | Appears in                    |
++=====================+===========+===============================+
+| TenGigE0/2/0/0       | physical  | physical, L2                  |
+| TenGigE0/2/0/0.100-  | VLAN      | L2, L3                         |
+|   .300               |           |                                |
+| TenGigE0/1/0/0,      | physical, | physical, L2                  |
+|   TenGigE0/1/0/1      | LAG member|                                |
+| Bundle-Ether10        | LAG       | L2, L3                         |
+| TenGigE0/2/0/1,       | physical, | physical only (inventory-only)|
+|   HundredGigE0/2/0/1  | unused    |                                |
++=====================+===========+===============================+
+```
+
+Table 1: RouterB interfaces vs. existing models
+
+## A.1.  Example: LAG, LAG Members, and VLAN Sub-Interfaces
 
 The following shortened RFC 7951 [RFC7951] example shows the full
-parent data-tree shape using the worked example in Appendix A. It
+parent data-tree shape using the worked example in this appendix. It
 is a fixture, not the literal body of the subtree GET in Section
 7.1; that GET returns the inner "ietf-interfaces:interfaces"
 resource representation. The complete three-router fixture is
@@ -858,208 +1059,6 @@ to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
 Documents (https://trustee.ietf.org/license-info) in effect on the
 date of publication of this document.
 
-# 9.  Security Considerations
-
-The parent device list exposes device identifiers and interface
-inventory relationships. Implementations MUST apply authorization
-to both the parent device list and every mounted interface schema.
-Access control on a parent data node does not by itself establish
-the same policy for mounted data. Servers MUST configure and test
-access control for mounted instances in accordance with RFC 8528
-and the Network Configuration Access Control Model (NACM, RFC 8341).
-
-The YANG augmentation modules defined here are operational/read-only
-(their added nodes are config false). The mounted ietf-interfaces
-schema itself contains both configuration and operational-state
-nodes; this document does not claim that the whole mounted schema
-is config false. A GET-only facade MUST reject write methods unless
-a separate write contract and authorization policy are specified.
-
-Interface identifiers, topology relationships, and device inventory
-can be sensitive network information. Implementations SHOULD limit
-access by user, tenant, and device scope, protect RESTCONF/API
-transport with TLS, and apply equivalent authorization to streamed
-events and unary reads.
-
-# 10.  IANA Considerations
-
-This document has no IANA actions. The "urn:example" namespaces
-and "example-" module names are placeholders for this individual
-draft. If the work is adopted by an IETF working group, final
-namespaces and module names will be selected and appropriate
-registrations requested in a later revision.
-
-# 11.  References
-
-## 11.1.  Normative References
-
-[RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-Requirement Levels", BCP 14, RFC 2119, March 1997.
-
-[RFC6991]  Schoenwaelder, J., Ed., "Common YANG Data Types",
-RFC 6991, July 2013.
-
-[RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling
-Language", RFC 7950, August 2016.
-
-[RFC7951]  Lhotka, L., "JSON Encoding of Data Modeled with YANG",
-RFC 7951, August 2016.
-
-[RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
-Protocol", RFC 8040, January 2017.
-
-[RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
-2119 Key Words", BCP 14, RFC 8174, May 2017.
-
-[RFC8340]  Bjorklund, M. and L. Berger, Ed., "YANG Tree
-Diagrams", BCP 215, RFC 8340, March 2018.
-
-[RFC8341]  Bierman, A. and M. Bjorklund, "Network Configuration
-Access Control Model", STD 91, RFC 8341, March 2018.
-
-[RFC8343]  Bjorklund, M., "A YANG Data Model for Interface
-Management", RFC 8343, March 2018.
-
-[RFC8345]  Clemm, A., Medved, J., Varga, R., Bahadur, N.,
-Ananthakrishnan, H., and X. Liu, "A YANG Data Model
-for Network Topologies", RFC 8345, March 2018.
-
-[RFC8407]  Bierman, A., "Guidelines for Authors and Reviewers of
-Documents Containing YANG Data Models", BCP 216,
-RFC 8407, October 2018.
-
-[RFC8525]  Bierman, A., Bjorklund, M., and K. Watsen, "YANG
-Library", RFC 8525, March 2019.
-
-[RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
-RFC 8528, March 2019.
-
-## 11.2.  Informative References
-
-[RFC8346]  Clemm, A., Medved, J., Varga, R., Liu, X.,
-Ananthakrishnan, H., and N. Bahadur, "A YANG Data
-Model for Layer 3 Topologies", RFC 8346, March 2018.
-
-[RFC8944]  Dong, J., Wei, X., Wu, Q., Boucadair, M., and A.
-Liu, "A YANG Data Model for Layer 2 Network
-Topologies", RFC 8944, November 2020.
-
-[IVY-INVENTORY]
-"A YANG Data Model for Network and Network Element
-Inventory", draft-ietf-ivy-network-inventory-yang-19
-(work in progress).
-
-[IVY-TOPOLOGY]
-"A YANG Data Model for Network Inventory Topology",
-draft-ietf-ivy-network-inventory-topology-11 (work in
-progress).
-
-[RFC2863]  McCloghrie, K. and F. Kastenholz, "The Interfaces
-Group MIB", RFC 2863, June 2000.  (IF-MIB)
-
-[RFC3635]  Flick, J., "Definitions of Managed Objects for the
-Ethernet-like Interface Types", RFC 3635,
-September 2003.  (EtherLike-MIB)
-
-[RFC4293]  Routhier, S., Ed., "Management Information Base for
-the Internet Protocol (IP)", RFC 4293, April 2006.
-(IP-MIB)
-
-[RFC4363]  Levi, D., Ed., and D. Harrington, Ed., "Definitions of
-Managed Objects for Bridges with Traffic Classes,
-Multicast Filtering, and Virtual LAN Extensions",
-RFC 4363, January 2006.  (Q-BRIDGE-MIB)
-
-[RFC6933]  Bierman, A., Romascanu, D., Quittek, J., and M.
-Chandramouli, "Entity MIB (Version 4)", RFC 6933,
-May 2013.  (ENTITY-MIB)
-
-[OC-INTERFACES]
-OpenConfig Working Group, "openconfig-interfaces.yang",
-OpenConfig public models repository
-(github.com/openconfig/public), 'mtu' leaf.
-
-[OC-ETHERNET]
-OpenConfig Working Group, "openconfig-if-ethernet.yang",
-OpenConfig public models repository, 'duplex-mode' and
-'auto-negotiate' leaves.
-
-[OC-AGGREGATE]
-OpenConfig Working Group, "openconfig-if-aggregate.yang",
-OpenConfig public models repository,
-'aggregation/state/member' and 'ethernet/config/
-aggregate-id' leaves.
-
-[OC-VLAN]  OpenConfig Working Group, "openconfig-vlan.yang",
-OpenConfig public models repository,
-'vlan/match/single-tagged/config/vlan-id' leaf.
-
-[OC-IF-IP] OpenConfig Working Group, "openconfig-if-ip.yang",
-OpenConfig public models repository,
-'ipv4/addresses/address/config/ip' leaf.
-
-[OC-TERMINAL-DEVICE]
-OpenConfig Working Group, "openconfig-terminal-device.
-yang", OpenConfig public models repository,
-'logical-channels/channel/config/{rate-class,
-trib-protocol}' leaves.
-
-[OC-PLATFORM-PORT]
-OpenConfig Working Group, "openconfig-platform-port.
-yang", OpenConfig public models repository,
-'hardware-port' leaf.
-
-[GNMI]     OpenConfig Working Group, "gRPC Network Management
-Interface (gNMI) Specification", OpenConfig public
-reference repository, gNMI specification.
-
-# Appendix A.  Full Worked Example (mobilecore.region3)
-
-The complete source data used to ground Section 8 --
-three IOS XR routers, their IVY network-inventory, IVY
-inventory-topology, RFC 8944 L2 topology, and RFC 8346-style L3
-topology -- plus the full parent data-tree fixture from which the
-Section 7.1 mounted-subtree response is derived -- are published as
-a companion file set:
-
-```text
-   01-ivy-network-inventory.json
-   02-ivy-inventory-topology.json
-   03-l2-topology.json
-   04-l3-topology.json
-   05-device-interfaces-schema-mount-v4.json   (worked fixture)
-   inventory-network-interfaces@2026-10-29.yang (parent)
-   device-interface-attributes@2026-10-29.yang (mounted)
-   inventory-network-interfaces-03.proto (Section 7.4)
-```
-
-These files are not reproduced in full here for length. They are
-companion working artifacts; this individual draft does not assign
-a stable public artifact URL. The parent YANG module and worked fixture
-need to be updated to reflect the renamed top-level container and the
-mount point on the device list. The mounted YANG module, worked fixture,
-and protobuf schema also need to be updated to reflect the removal of
-the per-interface inventory "ne-ref".
-
-Table 1 summarizes RouterB's interfaces and their representation in
-the source inventory and topology data.
-
-```text
-+=====================+===========+===============================+
-| Interface           | Type      | Appears in                    |
-+=====================+===========+===============================+
-| TenGigE0/2/0/0       | physical  | physical, L2                  |
-| TenGigE0/2/0/0.100-  | VLAN      | L2, L3                         |
-|   .300               |           |                                |
-| TenGigE0/1/0/0,      | physical, | physical, L2                  |
-|   TenGigE0/1/0/1      | LAG member|                                |
-| Bundle-Ether10        | LAG       | L2, L3                         |
-| TenGigE0/2/0/1,       | physical, | physical only (inventory-only)|
-|   HundredGigE0/2/0/1  | unused    |                                |
-+=====================+===========+===============================+
-```
-
-Table 1: RouterB interfaces vs. existing models
 
 # Appendix B.  Changes from -00
 
