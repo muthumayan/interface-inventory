@@ -240,8 +240,6 @@ device-interface-attributes
     |  +--ro node-ref       string
     |  +--ro tp-ref         string
     +--ro vlan-id?                  uint16
-    +--ro duplex-mode?              enumeration
-    +--ro direction?                enumeration
     +--ro controller-annotation?    string
 ```
 
@@ -273,8 +271,6 @@ mappings are in Appendices E, F, and G.
    | inventory-ref  | Correlate to inventory port  |
    | topology-ref   | Correlate to topology TP(s)  |
    | vlan-id        | Convenience VLAN tag value   |
-   | duplex-mode    | Augmented attribute          |
-   | direction      | Augmented attribute          |
    | controller-annotation | Controller annotation  |
    +================+==============================+
 ```
@@ -521,30 +517,6 @@ module device-interface-attributes {
       reference
         "RFC 8944; openconfig-vlan single-tagged vlan-id";
     }
-    leaf duplex-mode {
-      config false;
-      type enumeration {
-        enum full-duplex;
-        enum half-duplex;
-        enum auto;
-      }
-      description
-        "Observed/configured duplex state. The auto value is a
-         convenience rollup; OpenConfig models auto-negotiation as a
-         separate boolean.";
-      reference
-        "RFC 3635 EtherLike-MIB; openconfig-if-ethernet";
-    }
-
-    leaf direction {
-      config false;
-      type enumeration {
-        enum in;
-        enum out;
-        enum bidir;
-      }
-      description "Signal direction where applicable.";
-    }
     leaf controller-annotation {
       config false;
       type string;
@@ -776,8 +748,7 @@ OpenConfig public models repository
 
 [OC-ETHERNET]
 OpenConfig Working Group, "openconfig-if-ethernet.yang",
-OpenConfig public models repository, 'duplex-mode' and
-'auto-negotiate' leaves.
+OpenConfig public models repository, 'auto-negotiate' leaves.
 
 [OC-AGGREGATE]
 OpenConfig Working Group, "openconfig-if-aggregate.yang",
@@ -893,7 +864,6 @@ ietf-interfaces defines it using the YANG binary type.
                 "Bundle-Ether10"
               ],
               "lower-layer-if": [],
-              "device-interface-attributes:duplex-mode": "full-duplex",
               "device-interface-attributes:inventory-ref": {
                 "port-ref": "TenGigE0/1/0/0"
               },
@@ -914,7 +884,6 @@ ietf-interfaces defines it using the YANG binary type.
                 "Bundle-Ether10"
               ],
               "lower-layer-if": [],
-              "device-interface-attributes:duplex-mode": "full-duplex",
             },
             {
               "name": "Bundle-Ether10",
@@ -975,7 +944,6 @@ ietf-interfaces defines it using the YANG binary type.
               "oper-status": "down",
               "higher-layer-if": [],
               "lower-layer-if": [],
-              "device-interface-attributes:duplex-mode": "full-duplex",
               "device-interface-attributes:inventory-ref": {
                 "port-ref": "TenGigE0/2/0/1"
               },
@@ -993,8 +961,7 @@ Note how "higher-layer-if"/"lower-layer-if" give the LAG<->member
 and VLAN<->parent relationships directly, in both directions, with
 no topology-network traversal required; "inventory-ref" and
 "topology-ref" remain available for clients that still need to
-correlate back into inventory or topology views. "duplex-mode" and
-"direction" provide commonly needed attributes that RFC 8343 does not
+correlate back into inventory or topology views.
 define in its base module. "controller-annotation" allows a controller
 to attach an optional free-form note to an interface.
 IP addressing and per-family MTU are shown using RFC 8344 (ietf-ip)
@@ -1178,8 +1145,6 @@ one-line reason.
 | maximum transmission unit      | covered          | ietf-ip:ipv4/mtu,|
 |   (MTU)                        |                  | ietf-ip:ipv6/mtu |
 |                                |                  | (RFC 8344)       |
-| duplex mode                    | added (Sec. 6)  | 'duplex-mode'   |
-| signal direction                | added (Sec. 6)| 'direction'     |
 |   state                         |               |                 |
 | separate port, connector, and    | deferred     | distinct        |
 |   equipment identifiers          |              | connector-vs-   |
@@ -1250,16 +1215,6 @@ cases for which no direct counterpart was identified:
   models interface IP configuration under openconfig-if-ip, and models
   interface MTU under openconfig-interfaces.
 
-- "duplex-mode": openconfig-if-ethernet defines
-  "/interfaces/interface/ethernet/config/duplex-mode" with FULL and
-  HALF values, and models auto-negotiation separately with
-  "auto-negotiate". This document's "auto" value is a convenience
-  for servers that have not yet resolved a negotiated duplex.
-
-- "direction": no single generic leaf was identified. A related
-  concept is the client/line role in an openconfig-terminal-device
-  logical-channel-assignments entry for optical transport.
-
 
 - "controller-annotation": no counterpart was identified for this unstructured field.
 
@@ -1278,8 +1233,6 @@ This mapping is informative and does not constrain implementations.
    | inventory-ref  | ENTITY-MIB entAliasMapping* | ifIndex -> ent |
    | topology-ref   | none                        |                |
    | vlan-id        | Q-BRIDGE-MIB dot1qVlan*     | not IF-MIB      |
-   | duplex-mode    | EtherLike-MIB dot3StatsDuplexStatus | not IF-MIB |
-   | direction      | none                        |                |
    | controller-annotation | none                 |                |
    +================+=============================+================+
 ```
