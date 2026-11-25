@@ -238,7 +238,6 @@ device-interface-attributes
     +--ro vlan-id?                  uint16
     +--ro duplex-mode?              enumeration
     +--ro direction?                enumeration
-    +--ro layer-rate?               string
     +--ro service-state?            enumeration
     +--ro floating?                 boolean
     +--ro notes?                    string
@@ -271,7 +270,6 @@ mappings are in Appendices E, F, and G.
    | vlan-id        | Convenience VLAN tag         |
    | duplex-mode    | Augmented attribute          |
    | direction      | Augmented attribute          |
-   | layer-rate     | Augmented attribute          |
    | service-state  | Augmented attribute          |
    | floating       | Derived/no-topology flag     |
    | notes          | Free-text annotation         |
@@ -323,9 +321,10 @@ module inventory-network-interfaces {
 
   revision 2026-11-24 {
     description
-      "-04 revision. Removes ip-address and mtu augmentation leaves;
-       relies on RFC 8344 (ietf-ip) for interface IP addressing and
-       per-family MTU within the mounted schema set.";
+      "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
+       leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
+       and per-family MTU within the mounted schema set, and relies on
+       RFC 8343 if:speed for interface capacity.";
     reference "draft-ragalla-network-interface-inventory";
   }
 
@@ -409,9 +408,10 @@ module device-interface-attributes {
 
   revision 2026-11-24 {
     description
-      "-04 revision. Removes ip-address and mtu augmentation leaves;
-       relies on RFC 8344 (ietf-ip) for interface IP addressing and
-       per-family MTU within the mounted schema set.";
+      "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
+       leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
+       and per-family MTU within the mounted schema set, and relies on
+       RFC 8343 if:speed for interface capacity.";
     reference "draft-ragalla-network-interface-inventory";
   }
 
@@ -533,15 +533,6 @@ module device-interface-attributes {
       }
       description "Signal direction where applicable.";
     }
-
-    leaf layer-rate {
-      config false;
-      type string;
-      description
-        "Transport layer rate, e.g., ETH, OTU4, ODU4, or IP.";
-      reference "openconfig-terminal-device rate-class and trib-protocol";
-    }
-
     leaf service-state {
       config false;
       type enumeration {
@@ -1032,7 +1023,6 @@ The "TenGigE0/2/0/1" entry illustrates that "floating" can be
 "true" (no topology-ref entries) while "inventory-ref" remains
 populated with the known chassis-port component.
 
-
 --- back
 
 # Status of This Memo
@@ -1064,7 +1054,6 @@ document authors.  All rights reserved.  This document is subject
 to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
 Documents (https://trustee.ietf.org/license-info) in effect on the
 date of publication of this document.
-
 
 # Appendix B.  Changes from -00
 
@@ -1212,12 +1201,11 @@ one-line reason.
 | interface speed               | covered          | if:speed         |
 | link up/down trap enable      | covered          | if:link-up-down- |
 |                               |                   |  trap-enable    |
-| maximum transmission unit      | added (Sec. 6)  | 'mtu'; RFC 8343  |
-|   (MTU)                        |                 | Sec. 4 leaves   |
-|                                |                  | this unmapped   |
+| maximum transmission unit      | covered          | ietf-ip:ipv4/mtu,|
+|   (MTU)                        |                  | ietf-ip:ipv6/mtu |
+|                                |                  | (RFC 8344)       |
 | duplex mode                    | added (Sec. 6)  | 'duplex-mode'   |
 | signal direction                | added (Sec. 6)| 'direction'     |
-| transport layer rate            | added (Sec. 6)| 'layer-rate'    |
 | interface service/lifecycle     | added (Sec. 6)| 'service-state' |
 |   state                         |               |                 |
 | no-topology-reference flag     | added (Sec. 6)| 'floating'      |
@@ -1300,11 +1288,6 @@ cases for which no direct counterpart was identified:
   concept is the client/line role in an openconfig-terminal-device
   logical-channel-assignments entry for optical transport.
 
-- "layer-rate": openconfig-terminal-device defines
-  "/terminal-device/logical-channels/channel/config/
-  {rate-class,trib-protocol}" with identityref values such as
-  PROT_OTU4 and PROT_ODU4.
-
 - "service-state": no interface-scoped counterpart was identified.
 
 - "floating": no equivalent boolean was identified. An absent
@@ -1330,7 +1313,6 @@ This mapping is informative and does not constrain implementations.
    | vlan-id        | Q-BRIDGE-MIB dot1qVlan*     | not IF-MIB      |
    | duplex-mode    | EtherLike-MIB dot3StatsDuplexStatus | not IF-MIB |
    | direction      | none                        |                |
-   | layer-rate     | none                        |                |
    | service-state  | none                        |                |
    | floating       | none                        |                |
    | notes          | none                        |                |
