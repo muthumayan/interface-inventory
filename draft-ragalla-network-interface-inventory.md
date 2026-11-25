@@ -172,7 +172,9 @@ RFC 8346, RFC 8944, or the IVY drafts.
 
   - a "vlan-id" convenience leaf populated from the corresponding
     RFC 8944-style topology attributes, so a client does not have to
-    dereference "topology-ref" just to read a VLAN tag.
+    dereference "topology-ref" just to read a VLAN tag. RFC 8343 can
+    represent VLAN subinterfaces and their layering relationships, but it
+    does not define a standard leaf for the VLAN tag value itself.
 
   - IP addressing and per-family MTU are represented using RFC 8344
     (ietf-ip) within the mounted schema set, rather than being
@@ -252,7 +254,9 @@ information:
   inventory and topology views.
 
 - Convenience leaves derived from topology data, so clients do not need
-  to dereference topology termination points to retrieve a VLAN tag.
+  to dereference topology termination points to retrieve a VLAN tag
+  value. RFC 8343 can represent VLAN subinterfaces, but does not define
+  a standard leaf for the VLAN tag value.
 
 - Additional operational attributes and annotations not defined by the
   base interface model. Interface capacity is available via
@@ -268,7 +272,7 @@ mappings are in Appendices E, F, and G.
    +================+==============================+
    | inventory-ref  | Correlate to inventory port  |
    | topology-ref   | Correlate to topology TP(s)  |
-   | vlan-id        | Convenience VLAN tag         |
+   | vlan-id        | Convenience VLAN tag value   |
    | duplex-mode    | Augmented attribute          |
    | direction      | Augmented attribute          |
    | service-state  | Augmented attribute          |
@@ -506,7 +510,12 @@ module device-interface-attributes {
     leaf vlan-id {
       config false;
       type uint16 { range "1..4094"; }
-      description "Outer VLAN identifier when applicable.";
+      description
+        "Outer VLAN identifier (VLAN tag value) when applicable. This is
+         a convenience attribute: RFC 8343 can represent VLAN
+         subinterfaces, but does not define a standard leaf for the VLAN
+         tag value itself; implementations typically derive it from L2
+         configuration and/or topology attributes.";
       reference
         "RFC 8944; openconfig-vlan single-tagged vlan-id";
     }
