@@ -168,7 +168,9 @@ RFC 8346, RFC 8944, or the IVY drafts.
 
   - zero or more "topology-ref" entries carrying string
     identifiers for the RFC 8345 network/node/termination-point
-    views corresponding to the interface; and
+    views corresponding to the interface. Interfaces may exist without
+    participating in any topology view; in that case, the
+    "topology-ref" list is not present; and
 
   - a "vlan-id" convenience leaf populated from the corresponding
     RFC 8944-style topology attributes, so a client does not have to
@@ -240,9 +242,7 @@ device-interface-attributes
     +--ro vlan-id?                  uint16
     +--ro duplex-mode?              enumeration
     +--ro direction?                enumeration
-    +--ro service-state?            enumeration
-    +--ro floating?                 boolean
-    +--ro notes?                    string
+    +--ro controller-annotation?    string
 ```
 
 ## 5.3.  Augmentation Overview
@@ -275,9 +275,7 @@ mappings are in Appendices E, F, and G.
    | vlan-id        | Convenience VLAN tag value   |
    | duplex-mode    | Augmented attribute          |
    | direction      | Augmented attribute          |
-   | service-state  | Augmented attribute          |
-   | floating       | Derived/no-topology flag     |
-   | notes          | Free-text annotation         |
+   | controller-annotation | Controller annotation  |
    +================+==============================+
 ```
 
@@ -502,8 +500,10 @@ module device-interface-attributes {
       key "network-ref node-ref tp-ref";
       description
         "Zero or more topology termination points corresponding to
-         this interface. An interface represented in multiple topology
-         layers has one entry per layer/view.";
+         this interface. Interfaces may exist without participating in
+         any topology view; in that case, this list is not present.
+         An interface represented in multiple topology layers has one
+         entry per layer/view.";
       uses topology-ref;
     }
 
@@ -515,7 +515,9 @@ module device-interface-attributes {
          a convenience attribute: RFC 8343 can represent VLAN
          subinterfaces, but does not define a standard leaf for the VLAN
          tag value itself; implementations typically derive it from L2
-         configuration and/or topology attributes.";
+         configuration and/or topology attributes. When the interface is
+         not VLAN-tagged (for example, a physical parent interface), this
+         leaf is not present.";
       reference
         "RFC 8944; openconfig-vlan single-tagged vlan-id";
     }
@@ -543,33 +545,11 @@ module device-interface-attributes {
       }
       description "Signal direction where applicable.";
     }
-    leaf service-state {
-      config false;
-      type enumeration {
-        enum planned;
-        enum in-test;
-        enum in-service;
-        enum maintenance;
-        enum out-of-service;
-      }
-      description
-        "Service/lifecycle state, distinct from RFC 8343 admin-status
-         and oper-status.";
-    }
-
-    leaf floating {
-      config false;
-      type boolean;
-      description
-        "True when topology-ref is empty. inventory-ref may still be
-         present for a known physical component not participating in a
-         topology view.";
-    }
-
-    leaf notes {
+    leaf controller-annotation {
       config false;
       type string;
-      description "Optional human-readable annotation.";
+      description
+        "Optional controller-provided annotation for the interface.";
     }
   }
 }
@@ -888,7 +868,7 @@ companion fixture needs to be updated to match this revision.
 
 The topology relationships and documented-prefix IP addresses come
 from the synthetic source payloads. The if-index, MAC address,
-admin/oper states, duplex, and service-state values are
+admin/oper states and duplex values are
 illustrative placeholders, not measurements from a live device.
 In the RFC 7951 encoding below, phys-address is base64 because
 ietf-interfaces defines it using the YANG binary type.
@@ -914,8 +894,6 @@ ietf-interfaces defines it using the YANG binary type.
               ],
               "lower-layer-if": [],
               "device-interface-attributes:duplex-mode": "full-duplex",
-              "device-interface-attributes:service-state": "in-service",
-              "device-interface-attributes:floating": false,
               "device-interface-attributes:inventory-ref": {
                 "port-ref": "TenGigE0/1/0/0"
               },
@@ -937,8 +915,6 @@ ietf-interfaces defines it using the YANG binary type.
               ],
               "lower-layer-if": [],
               "device-interface-attributes:duplex-mode": "full-duplex",
-              "device-interface-attributes:service-state": "in-service",
-              "device-interface-attributes:floating": false
             },
             {
               "name": "Bundle-Ether10",
@@ -950,8 +926,6 @@ ietf-interfaces defines it using the YANG binary type.
                 "TenGigE0/1/0/0",
                 "TenGigE0/1/0/1"
               ],
-              "device-interface-attributes:service-state": "in-service",
-              "device-interface-attributes:floating": false,
               "ietf-ip:ipv4": {
                 "mtu": 9216,
                 "address": [
@@ -984,8 +958,6 @@ ietf-interfaces defines it using the YANG binary type.
                 "TenGigE0/2/0/0"
               ],
               "device-interface-attributes:vlan-id": 100,
-              "device-interface-attributes:service-state": "in-service",
-              "device-interface-attributes:floating": false,
               "ietf-ip:ipv4": {
                 "mtu": 1500,
                 "address": [
@@ -1004,12 +976,10 @@ ietf-interfaces defines it using the YANG binary type.
               "higher-layer-if": [],
               "lower-layer-if": [],
               "device-interface-attributes:duplex-mode": "full-duplex",
-              "device-interface-attributes:service-state": "out-of-service",
-              "device-interface-attributes:floating": true,
               "device-interface-attributes:inventory-ref": {
                 "port-ref": "TenGigE0/2/0/1"
               },
-              "device-interface-attributes:notes": "Inventory-only physical port; no topology termination point or link"
+              "device-interface-attributes:controller-annotation": "Inventory-only physical port; no topology termination point or link"
             }
           ]
         }
@@ -1023,14 +993,15 @@ Note how "higher-layer-if"/"lower-layer-if" give the LAG<->member
 and VLAN<->parent relationships directly, in both directions, with
 no topology-network traversal required; "inventory-ref" and
 "topology-ref" remain available for clients that still need to
-correlate back into inventory or topology views. "duplex-mode",
-"service-state", and "floating" (Appendix E) provide commonly
-needed attributes that RFC 8343 does not define in its base module.
+correlate back into inventory or topology views. "duplex-mode" and
+"direction" provide commonly needed attributes that RFC 8343 does not
+define in its base module. "controller-annotation" allows a controller
+to attach an optional free-form note to an interface.
 IP addressing and per-family MTU are shown using RFC 8344 (ietf-ip)
 within the same mounted interface entries.
 
-The "TenGigE0/2/0/1" entry illustrates that "floating" can be
-"true" (no topology-ref entries) while "inventory-ref" remains
+The "TenGigE0/2/0/1" entry illustrates that an interface may have
+no "topology-ref" entries while "inventory-ref" remains
 populated with the known chassis-port component.
 
 --- back
@@ -1081,12 +1052,6 @@ date of publication of this document.
 
 - Added an "Author's Address" section.
 
-- Clarified the semantics of the "floating" leaf: it is "true"
-  when the interface's "topology-ref" list is empty, independent
-  of whether "inventory-ref" is set. The -00 description keyed
-  "floating" off "inventory-ref" presence, which contradicted
-  the companion JSON instance.
-
 - Changed "alarm-ref" from a leaf-list of instance-identifier to
   a structured list keyed by the RFC 8632 (resource,
   alarm-type-id, alarm-type-qualifier) tuple, with
@@ -1101,8 +1066,7 @@ date of publication of this document.
   mount-point label remained "device-root".
 
 - Explicitly marked the operational-state leaves
-  ("current-alarm-severity", "alarm-ref", "floating")
-  "config false".
+  ("current-alarm-severity", "alarm-ref") "config false".
 
 - Updated the companion ".proto" to match: renamed package to
   "example.device_interface_inventory.v1", added gNMI
@@ -1216,9 +1180,7 @@ one-line reason.
 |                                |                  | (RFC 8344)       |
 | duplex mode                    | added (Sec. 6)  | 'duplex-mode'   |
 | signal direction                | added (Sec. 6)| 'direction'     |
-| interface service/lifecycle     | added (Sec. 6)| 'service-state' |
 |   state                         |               |                 |
-| no-topology-reference flag     | added (Sec. 6)| 'floating'      |
 | separate port, connector, and    | deferred     | distinct        |
 |   equipment identifiers          |              | connector-vs-   |
 |                                   |              | port identity   |
@@ -1298,13 +1260,8 @@ cases for which no direct counterpart was identified:
   concept is the client/line role in an openconfig-terminal-device
   logical-channel-assignments entry for optical transport.
 
-- "service-state": no interface-scoped counterpart was identified.
 
-- "floating": no equivalent boolean was identified. An absent
-  openconfig-platform-port "hardware-port" indicates no port binding;
-  it does not establish whether an interface has topology references.
-
-- "notes": no counterpart was identified for this unstructured field.
+- "controller-annotation": no counterpart was identified for this unstructured field.
 
 # Author's Address
 
@@ -1323,9 +1280,7 @@ This mapping is informative and does not constrain implementations.
    | vlan-id        | Q-BRIDGE-MIB dot1qVlan*     | not IF-MIB      |
    | duplex-mode    | EtherLike-MIB dot3StatsDuplexStatus | not IF-MIB |
    | direction      | none                        |                |
-   | service-state  | none                        |                |
-   | floating       | none                        |                |
-   | notes          | none                        |                |
+   | controller-annotation | none                 |                |
    +================+=============================+================+
 ```
 
