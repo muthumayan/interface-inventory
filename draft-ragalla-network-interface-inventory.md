@@ -3,7 +3,7 @@ title: "Network-wide Interface Inventory"
 abbrev: "Network Interface Inventory"
 category: std
 
-docname: draft-ragalla-device-interface-inventory-latest
+docname: draft-ragalla-network-interface-inventory-latest
 submissiontype: IETF
 number:
 date: 2026-10-29
@@ -48,7 +48,7 @@ relationships, with correlations to network inventory and topology data.
 
 --- middle
 
-# 1.  Introduction
+# Introduction
 
 Network operators and management systems need a consistent inventory
 of physical and logical interfaces across network elements. Such an
@@ -73,7 +73,7 @@ describe the data model, Section 7 describes operations, and Appendix
 A provides a worked example. Discovery and reconciliation of the
 underlying data are implementation-specific.
 
-# 2.  Conventions and Terminology
+# Conventions and Terminology
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
 NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
@@ -89,7 +89,7 @@ used as defined in [IVY-INVENTORY].  The terms "network", "node",
 "termination point" (TP), and "supporting-node"/"supporting-
 termination-point" are used as defined in [RFC8345].
 
-# 3.  Problem Statement
+# Problem Statement
 
 A SDN controller may collect interface data from multiple network elements. RFC 8343 provides an interface model for a network-element, including interface state and layering. The controller also keeps an inventory of all network elements and their physical component inventory. Depending on the layer in which the controller operates it also keeps track of the topological view of the network (L1, L2 or L3).
 
@@ -107,7 +107,7 @@ This proposed model aggregates interface information from multiple network devic
 completeness and accuracy depend on the data available to the server and on the controller's discovery and reconciliation mechanisms.
 
 
-# 4.  Relationship to Existing Work
+# Relationship to Existing Work
 
 RFC 8343 [RFC8343] Section 3.3 ("Interface Layering") already defines the generic mechanism this document needs: two read-only leaf-lists, "higher-layer-if" and "lower-layer-if", present on every "/interfaces/interface" entry, explicitly described as the YANG equivalent of the IF-MIB "ifStackTable" (RFC 8343 Section 4). A LAG's members populate the LAG's "lower-layer-if"; each member's "higher-layer-if" points back at the LAG.  A VLAN sub-interface's "lower-layer-if" points at its parent physical interface.  This document does not redefine LAG or VLAN semantics; it relies
 entirely on RFC 8343 Section 3.3 for interface stacking.
@@ -115,9 +115,9 @@ entirely on RFC 8343 Section 3.3 for interface stacking.
 RFC 8528 [RFC8528] ("YANG Schema Mount") defines a mechanism for attaching a schema tree at a mount point. Appendix A illustrates device/LNE-scoped mounted data, but does not prescribe a device key or require one mount per device. This proposal chooses that organization as a data-model design. It uses separate parent and mounted modules. RFC 8528 confines paths in a mounted schema to the mount jail; therefore the mounted augmentation represents cross-model inventory/topology identifiers as strings rather than leafrefs into parent-schema data. A server may use shared-schema
 parent-reference metadata for XPath evaluation, but this proposal does not require it. This document does not change RFC 8345, RFC 8346, RFC 8944, or the IVY drafts.
 
-# 5.  Data Model Overview
+# Data Model Overview
 
-## 5.1.  Design Summary
+## Design Summary
 
 - "network-interface-inventory/device" is keyed by "ne-ref", a leafref into the IVY "network-element" list -- the same device identifier already used by inventory, so no new device identity scheme is introduced.
 
@@ -162,7 +162,7 @@ network-interface-inventory
     +-- interfaces ...
 ```
 
-## 5.2.  Tree Diagram
+## Tree Diagram
 
 Parent schema module: inventory-network-interfaces
 
@@ -190,7 +190,7 @@ device-interface-attributes
     +--ro controller-annotation?    string
 ```
 
-## 5.3.  Augmentation Overview
+## Augmentation Overview
 
 The mounted interface augmentation provides three categories of information:
 
@@ -218,7 +218,7 @@ mappings are in Appendices B and C.
    +================+=====================================+
 ```
 
-# 6.  YANG Modules
+# YANG Modules
 
 The model is split to respect RFC 8528 mount-jail semantics. The parent module is loaded in the management system's parent schema. At each mount point, the server advertises a mounted schema set that includes ietf-interfaces, ietf-ip, and device-interface-attributes.
 
@@ -226,7 +226,7 @@ The same mounted module set MAY be shared by all devices when their schemas are 
 
 The mounted augmentation contains no leafref into the parent inventory or topology trees. Its cross-model correlation values are strings: RFC 8528 confines mounted paths to the mount jail unless a server configures shared-schema parent-reference metadata. This proposal does not require parent-reference metadata.
 
-## 6.1.  Parent module: inventory-network-interfaces
+## Parent module: inventory-network-interfaces
 
 &lt;CODE BEGINS&gt; file "inventory-network-interfaces@2026-10-29.yang"
 
@@ -313,7 +313,7 @@ module inventory-network-interfaces {
 
 &lt;CODE ENDS&gt;
 
-## 6.2.  Mounted augmentation: device-interface-attributes
+## Mounted augmentation: device-interface-attributes
 
 &lt;CODE BEGINS&gt; file "device-interface-attributes@2026-11-24.yang"
 
@@ -463,11 +463,11 @@ module device-interface-attributes {
 
 &lt;CODE ENDS&gt;
 
-# 7.  RESTCONF Operations
+# RESTCONF Operations
 
 These examples use the RESTCONF URI form defined by RFC 8040 for a resource beneath a schema-mount point. They assume the parent and mounted schemas described in Section 6 are advertised by the server through schema-mount/YANG Library data. Implementations that do not expose RESTCONF may provide equivalent data through another API.
 
-## 7.1.  Retrieve All Interfaces on a Device
+## Retrieve All Interfaces on a Device
 
 A client retrieves every interface on a device with a single GET against the mounted interfaces container. URI path key values MUST be percent-encoded when they contain reserved characters:
 
@@ -480,7 +480,7 @@ A client retrieves every interface on a device with a single GET against the mou
 The response representation is the mounted "ietf-interfaces:interfaces" subtree plus augmentation data. The requested device key supplies the network-element context for any "inventory-ref/port-ref" in that subtree.
 Appendix A.2 shows a shortened full parent data-tree fixture for context; it is not the literal body of this subtree GET.
 
-## 7.2.  Retrieve a Single Interface
+## Retrieve a Single Interface
 
 ```http
    GET /restconf/data/inventory-network-interfaces:\
@@ -489,11 +489,11 @@ Appendix A.2 shows a shortened full parent data-tree fixture for context; it is 
        interface=Bundle-Ether10
 ```
 
-## 7.3.  Filtering by Interface Type
+## Filtering by Interface Type
 
 RESTCONF does not define generic server-side predicate filtering on list entries. The base operation in this document returns the interface list; RFC 8040 "fields" and "depth" may be used for payload selection. A future revision MAY specify a YANG action or another explicit filter contract for high-interface-count devices; no such action or filter is defined by this revision.
 
-## 7.4.  Protocol Buffers Encoding for Streaming Clients
+## Protocol Buffers Encoding for Streaming Clients
 
 RESTCONF/JSON (RFC 7951) is the canonical encoding for this document's data model, but some clients -- in particular gRPC- based telemetry and streaming consumers -- prefer a typed binary wire format. A non-normative Protocol Buffers (proto3) schema, "inventory-network-interfaces-02.proto", is published alongside this document.
 
@@ -514,7 +514,7 @@ The proto schema defines:
 
 The protobuf schema is informative. Its field naming and helper enum fields are not a normative wire encoding of YANG; the YANG modules in Section 6 are authoritative if the representations differ. Any companion protobuf schema needs to be updated to reflect the removal of the per-interface inventory "ne-ref".
 
-# 8.  Security Considerations
+# Security Considerations
 
 The parent device list exposes device identifiers and interface
 inventory relationships. Implementations MUST apply authorization
@@ -537,7 +537,7 @@ access by user, tenant, and device scope, protect RESTCONF/API
 transport with TLS, and apply equivalent authorization to streamed
 events and unary reads.
 
-# 9.  IANA Considerations
+# IANA Considerations
 
 This document has no IANA actions. The "urn:example" namespaces
 and "example-" module names are placeholders for this individual
@@ -545,9 +545,9 @@ draft. If the work is adopted by an IETF working group, final
 namespaces and module names will be selected and appropriate
 registrations requested in a later revision.
 
-# 10.  References
+# References
 
-## 10.1.  Normative References
+## Normative References
 
 [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
 Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -590,7 +590,7 @@ Library", RFC 8525, March 2019.
 [RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
 RFC 8528, March 2019.
 
-## 10.2.  Informative References
+## Informative References
 
 [RFC8346]  Clemm, A., Medved, J., Varga, R., Liu, X.,
 Ananthakrishnan, H., and N. Bahadur, "A YANG Data
@@ -650,7 +650,7 @@ reference repository, gNMI specification.
 
 --- back
 
-# Appendix A.  Full Worked Example (mobilecore.region3)
+# Full Worked Example (mobilecore.region3)
 
 This appendix uses a synthetic three-router network to show how the
 proposed model brings together interface data, physical inventory, and
@@ -675,7 +675,7 @@ response is derived -- are published as a companion file set:
 
 The YANG modules, protobuf schema, source topology payloads, and worked JSON fixture are included in this repository.  The JSON fixture is a synthetic example; interface state/MAC/ifIndex values not present in the source topology payloads are illustrative, not live-device observations.
 
-## A.1.  Example Network and Illustrative Goals
+## Example Network and Illustrative Goals
 
 The topology payloads describe the following three-router connectivity.
 RouterA, RouterB, and RouterC are shorthand for the corresponding
@@ -720,7 +720,7 @@ RouterB's interfaces are represented as follows in the source inventory and topo
 *  TenGigE0/2/0/1 and HundredGigE0/2/0/1: inventory-only ports.
 
 
-## A.2.  Interface Inventory Representation
+## Interface Inventory Representation
 
 The proposed model covers RouterB's interface inventory through one
 device entry keyed by its network-element reference. Under that entry,
@@ -877,7 +877,7 @@ The "TenGigE0/2/0/1" entry illustrates that an interface may have
 no "topology-ref" entries while "inventory-ref" remains
 populated with the known chassis-port component.
 
-# Appendix B.  Comparison Against Commonly Implemented Interface Attributes
+# Comparison Against Commonly Implemented Interface Attributes
 
 The attributes in this document were compared against the kind of
 attribute set commonly exposed by
@@ -937,9 +937,9 @@ module in Section 6 and the tree diagram in Section 5.2; the
 "deferred" items are recorded here so a future revision does not
 have to repeat this comparison from scratch.
 
-# Appendix C.  OpenConfig Comparisons
+# OpenConfig Comparisons
 
-## C.1.  Interface Layering
+## Interface Layering
 
 The bidirectional LAG/VLAN stacking design in Section 5.1 is
 validated by real-world experience in OpenConfig: when
@@ -959,7 +959,7 @@ generic mechanism instead of a LAG-specific one so that the same
 sub-interfaces and other interface-type stacking without a
 separate leaf per interface type.
 
-## C.2.  Attribute Comparisons
+## Attribute Comparisons
 
 The following comparisons identify related OpenConfig leaves and
 cases for which no direct counterpart was identified:
