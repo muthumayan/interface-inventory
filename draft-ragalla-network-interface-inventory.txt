@@ -267,32 +267,49 @@ Table of Contents
    represents another network element.  Arrows indicate relationships,
    not data containment.
 
-   text network-interface-inventory | +-- device [ne-ref = RouterA]
-   [mount point: interfaces-root] | +-- interfaces ... | +-- device [ne-
-   ref = RouterB] [mount point: interfaces-root] | +-- interfaces | +--
-   interface [Bundle-Ether10] | | +-- lower-layer-if -->
-   TenGigE0/1/0/0 | | +-- topology-ref -----> network / node / TP | | |
-   +-- interface [TenGigE0/1/0/0] | +-- higher-layer-if -> Bundle-
-   Ether10 | +-- inventory-ref ---> port component in RouterB | +--
-   topology-ref -----> network / node / TP | | ... | +-- device [ne-ref
-   = RouterX] [mount point: interfaces-root] +-- interfaces ...
+   network-interface-inventory
+   |
+   +-- device [ne-ref = RouterA] [mount point: interfaces-root]
+   |   +-- interfaces ...
+   |
+   +-- device [ne-ref = RouterB] [mount point: interfaces-root]
+   |   +-- interfaces
+   |       +-- interface [Bundle-Ether10]
+   |       |   +-- lower-layer-if --> TenGigE0/1/0/0
+   |       |   +-- topology-ref -----> network / node / TP
+   |       |
+   |       +-- interface [TenGigE0/1/0/0]
+   |           +-- higher-layer-if -> Bundle-Ether10
+   |           +-- inventory-ref ---> port component in RouterB
+   |           +-- topology-ref -----> network / node / TP
+   |
+   |   ...
+   |
+   +-- device [ne-ref = RouterX] [mount point: interfaces-root]
+       +-- interfaces ...
 
 5.2.  Tree Diagram
 
    Parent schema module: inventory-network-interfaces
 
-   text +--ro network-interface-inventory +--ro device* [ne-ref] +--ro
-   ne-ref -> /nei:network-inventory/.../ne-id +--mp interfaces-root
-   (mounted schema set includes ietf-interfaces, ietf-ip, and device-
-   interface-attributes)
+     +--ro network-interface-inventory
+        +--ro device* [ne-ref]
+           +--ro ne-ref             -> /nei:network-inventory/.../ne-id
+           +--mp interfaces-root
+              (mounted schema set includes ietf-interfaces, ietf-ip, and
+               device-interface-attributes)
 
    Mounted schema augmentation module: device-interface-attributes
 
-   text augment /if:interfaces/if:interface: +--ro inventory-ref?  |
-   +--ro port-ref?  string +--ro topology-ref* [network-ref node-ref tp-
-   ref] | +--ro network-ref string | +--ro node-ref string | +--ro tp-
-   ref string +--ro vlan-id?  uint16 +--ro controller-annotation?
-   string
+     augment /if:interfaces/if:interface:
+       +--ro inventory-ref?
+       |  +--ro port-ref?      string
+       +--ro topology-ref* [network-ref node-ref tp-ref]
+       |  +--ro network-ref    string
+       |  +--ro node-ref       string
+       |  +--ro tp-ref         string
+       +--ro vlan-id?                  uint16
+       +--ro controller-annotation?    string
 
 5.3.  Augmentation Overview
 
@@ -319,13 +336,14 @@ Table of Contents
    Section 6.  Examples are in Appendix A.  Informative comparisons and
    mappings are in Appendices B and C.
 
-   text +=======================+==============================+ |
-   Node(s) | Purpose |
-   +=======================+==============================+ | inventory-
-   ref | Correlate to inventory port | | topology-ref | Correlate to
-   topology TP(s) | | vlan-id | Convenience VLAN tag value | |
-   controller-annotation | Controller annotation |
-   +================+=====================================+
+      +=======================+==============================+
+      | Node(s)               | Purpose                      |
+      +=======================+==============================+
+      | inventory-ref         | Correlate to inventory port  |
+      | topology-ref          | Correlate to topology TP(s)  |
+      | vlan-id               | Convenience VLAN tag value   |
+      | controller-annotation | Controller annotation        |
+      +================+=====================================+
 
 6.  YANG Modules
 
@@ -349,70 +367,84 @@ Table of Contents
 
    <CODE BEGINS> file "inventory-network-interfaces@2026-10-29.yang"
 
-   ```yang module inventory-network-interfaces { yang-version 1.1;
-   namespace "urn:example:ns:yang:inventory-network-interfaces"; prefix
-   "inii";
+   module inventory-network-interfaces {
+     yang-version 1.1;
+     namespace "urn:example:ns:yang:inventory-network-interfaces";
+     prefix "inii";
 
-   import ietf-yang-schema-mount { prefix yangmnt; } import ietf-
-   network-inventory { prefix nei; }
+     import ietf-yang-schema-mount { prefix yangmnt; }
+     import ietf-network-inventory { prefix nei; }
 
-   organization "TBD"; contact "TBD";
+     organization "TBD";
+     contact "TBD";
 
-   description "Parent data model for a device-scoped interface
-   inventory facade.  It identifies a network element and defines an RFC
-   8528 schema mount point where the mounted schema set contains ietf-
-   interfaces, ietf-ip, and device-interface-attributes.
-
-    The module does not define an HTTP API. A server may expose the
-    device list and mounted interface data through NETCONF, RESTCONF,
-    or another management interface.";
-
-   revision 2026-11-24 { description "-04 revision.  Removes ip-address,
-   mtu, and layer-rate augmentation leaves; relies on RFC 8344 (ietf-ip)
-   for interface IP addressing and per-family MTU within the mounted
-   schema set, and relies on RFC 8343 if:speed for interface capacity.";
-   reference "draft-ragalla-network-interface-inventory"; }
-
-   revision 2026-10-29 { description "-03 revision.  Parent mount
-   wrapper is unchanged; the mounted augmentation no longer includes
-   alarm attributes."; reference "draft-ragalla-device-interface-
-   inventory-03"; }
-
-   revision 2026-10-13 { description "Initial -02 parent/child split.
-   The parent device mount wrapper is separate from the mounted
-   interface augmentation."; reference "draft-ragalla-device-interface-
-   inventory-02"; }
-
-   container network-interface-inventory { config false; description
-   "Network-wide interface inventory organized by network element.";
-
-   list device {
-     key "ne-ref";
      description
-       "One entry for each network element served by this management
-        system. The ne-ref leafref is evaluated in the parent schema,
-        outside the mounted schema jail. The server advertises the
-        mounted schema through RFC 8528 schema-mounts data, using an
-        inline or shared-schema entry as appropriate. For this
-        read-only inventory view, the schema-mount config value MUST
-        be false. The mounted module set MUST include ietf-interfaces,
-        ietf-ip, and device-interface-attributes.";
+       "Parent data model for a device-scoped interface inventory facade.
+        It identifies a network element and defines an RFC 8528 schema
+        mount point where the mounted schema set contains ietf-interfaces,
+        ietf-ip, and device-interface-attributes.
 
-     leaf ne-ref {
-       type leafref {
-         path "/nei:network-inventory/nei:network-elements/"
-            + "nei:network-element/nei:ne-id";
+        The module does not define an HTTP API. A server may expose the
+        device list and mounted interface data through NETCONF, RESTCONF,
+        or another management interface.";
+
+     revision 2026-11-24 {
+       description
+         "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
+          leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
+          and per-family MTU within the mounted schema set, and relies on
+          RFC 8343 if:speed for interface capacity.";
+       reference "draft-ragalla-network-interface-inventory";
+     }
+
+     revision 2026-10-29 {
+       description
+         "-03 revision. Parent mount wrapper is unchanged; the mounted
+          augmentation no longer includes alarm attributes.";
+       reference "draft-ragalla-device-interface-inventory-03";
+     }
+
+     revision 2026-10-13 {
+       description
+         "Initial -02 parent/child split. The parent device mount wrapper
+          is separate from the mounted interface augmentation.";
+       reference "draft-ragalla-device-interface-inventory-02";
+     }
+
+     container network-interface-inventory {
+       config false;
+       description
+         "Network-wide interface inventory organized by network element.";
+
+       list device {
+         key "ne-ref";
+         description
+           "One entry for each network element served by this management
+            system. The ne-ref leafref is evaluated in the parent schema,
+            outside the mounted schema jail. The server advertises the
+            mounted schema through RFC 8528 schema-mounts data, using an
+            inline or shared-schema entry as appropriate. For this
+            read-only inventory view, the schema-mount config value MUST
+            be false. The mounted module set MUST include ietf-interfaces,
+            ietf-ip, and device-interface-attributes.";
+
+         leaf ne-ref {
+           type leafref {
+             path "/nei:network-inventory/nei:network-elements/"
+                + "nei:network-element/nei:ne-id";
+           }
+           description
+             "Identifier of the network element owning the mounted
+              interface list.";
+         }
+
+         yangmnt:mount-point "interfaces-root" {
+           description
+             "RFC 8528 mount point for the per-device interface model.";
+         }
        }
-       description
-         "Identifier of the network element owning the mounted
-          interface list.";
      }
-
-     yangmnt:mount-point "interfaces-root" {
-       description
-         "RFC 8528 mount point for the per-device interface model.";
-     }
-   }   } } ```
+   }
 
    <CODE ENDS>
 
@@ -420,129 +452,147 @@ Table of Contents
 
    <CODE BEGINS> file "device-interface-attributes@2026-11-24.yang"
 
-   ```yang module device-interface-attributes { yang-version 1.1;
-   namespace "urn:example:ns:yang:device-interface-attributes"; prefix
-   "edia";
+   module device-interface-attributes {
+     yang-version 1.1;
+     namespace "urn:example:ns:yang:device-interface-attributes";
+     prefix "edia";
 
-   import ietf-interfaces { prefix if; }
+     import ietf-interfaces  { prefix if; }
 
-   organization "TBD"; contact "TBD";
+     organization "TBD";
+     contact "TBD";
 
-   description "Read-only augmentation of a mounted ietf-interfaces
-   schema for device-scoped interface inventory.  This module is
-   intended to be included in the mounted schema set at the interfaces-
-   root mount point defined by inventory-network-interfaces.
-
-    RFC 8528 confines a mounted schema to its mount jail. Therefore,
-    inventory-ref and topology-ref values are correlation identifiers
-    represented as strings; the mounted module does not use leafrefs
-    that cross into the parent inventory or topology schema.";
-
-   revision 2026-11-24 { description "-04 revision.  Removes ip-address,
-   mtu, and layer-rate augmentation leaves; relies on RFC 8344 (ietf-ip)
-   for interface IP addressing and per-family MTU within the mounted
-   schema set, and relies on RFC 8343 if:speed for interface capacity.";
-   reference "draft-ragalla-network-interface-inventory"; }
-
-   revision 2026-10-29 { description "-03 revision.  Removes current-
-   alarm-severity and alarm-ref from the mounted interface augmentation.
-   All remaining augmentation data is operational/read-only; cross-mount
-   correlations use string identifiers to respect the RFC 8528 mount-
-   jail boundary."; reference "draft-ragalla-device-interface-inventory-
-   03"; }
-
-   revision 2026-10-13 { description "Initial -02 mounted-interface
-   augmentation.  All augmentation data is operational/read-only.
-   Cross-mount correlations use string identifiers to respect the RFC
-   8528 mount-jail boundary."; reference "draft-ragalla-device-
-   interface-inventory-02"; }
-
-   grouping topology-ref { description "Reference to a termination point
-   in an RFC 8345 topology view.  The identifiers are strings because
-   the referenced topology data may be outside the mounted schema.";
-
-   leaf network-ref {
-     type string;
-     mandatory true;
-     description "RFC 8345 network-id.";
-   }
-   leaf node-ref {
-     type string;
-     mandatory true;
-     description "node-id within network-ref.";
-   }
-   leaf tp-ref {
-     type string;
-     mandatory true;
-     description "tp-id within node-ref.";
-   }   }
-
-   grouping inventory-ref { description "Identifies the inventory port
-   component associated with this interface, within the network element
-   identified by the enclosing device's ne-ref.  The identifier is a
-   string because IVY inventory data may be outside the mounted
-   schema.";
-
-   leaf port-ref {
-     type string;
      description
-       "IVY component-id of the physical port, when known, scoped
-        to the network element identified by the enclosing device's
-        ne-ref. This leaf identifies a directly associated physical
-        port. A link aggregation interface has no port-ref; its
-        physical ports can be identified by following its
-        lower-layer-if entries to member interfaces and reading
-        their port-ref values, when the server reports those
-        relationships and correlations. This string does not enforce
-        the existence of the referenced inventory component.";
-   }   }
+       "Read-only augmentation of a mounted ietf-interfaces schema for
+        device-scoped interface inventory. This module is intended to be
+        included in the mounted schema set at the interfaces-root mount point
+        defined by inventory-network-interfaces.
 
-   augment "/if:interfaces/if:interface" { description "Adds read-only
-   inventory/topology correlations and commonly needed interface
-   attributes to the mounted RFC 8343 interface list.  IP addressing and
-   per-family MTU are represented using RFC 8344 (ietf-ip) when that
-   module is included in the mounted schema set.  The base ietf-
-   interfaces module remains unchanged.";
+        RFC 8528 confines a mounted schema to its mount jail. Therefore,
+        inventory-ref and topology-ref values are correlation identifiers
+        represented as strings; the mounted module does not use leafrefs
+        that cross into the parent inventory or topology schema.";
 
-   container inventory-ref {
-     config false;
-     description
-       "Correlation to a physical port component, if one is known.";
-     uses inventory-ref;
+     revision 2026-11-24 {
+       description
+         "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
+          leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
+          and per-family MTU within the mounted schema set, and relies on
+          RFC 8343 if:speed for interface capacity.";
+       reference "draft-ragalla-network-interface-inventory";
+     }
+
+     revision 2026-10-29 {
+       description
+         "-03 revision. Removes current-alarm-severity and alarm-ref from
+          the mounted interface augmentation. All remaining augmentation
+          data is operational/read-only; cross-mount correlations use
+          string identifiers to respect the RFC 8528 mount-jail boundary.";
+       reference "draft-ragalla-device-interface-inventory-03";
+     }
+
+     revision 2026-10-13 {
+       description
+         "Initial -02 mounted-interface augmentation. All augmentation
+          data is operational/read-only. Cross-mount correlations use
+          string identifiers to respect the RFC 8528 mount-jail boundary.";
+       reference "draft-ragalla-device-interface-inventory-02";
+     }
+
+     grouping topology-ref {
+       description
+         "Reference to a termination point in an RFC 8345 topology view.
+          The identifiers are strings because the referenced topology
+          data may be outside the mounted schema.";
+
+       leaf network-ref {
+         type string;
+         mandatory true;
+         description "RFC 8345 network-id.";
+       }
+       leaf node-ref {
+         type string;
+         mandatory true;
+         description "node-id within network-ref.";
+       }
+       leaf tp-ref {
+         type string;
+         mandatory true;
+         description "tp-id within node-ref.";
+       }
+     }
+
+     grouping inventory-ref {
+       description
+         "Identifies the inventory port component associated with this
+          interface, within the network element identified by the
+          enclosing device's ne-ref. The identifier is a string because
+          IVY inventory data may be outside the mounted schema.";
+
+       leaf port-ref {
+         type string;
+         description
+           "IVY component-id of the physical port, when known, scoped
+            to the network element identified by the enclosing device's
+            ne-ref. This leaf identifies a directly associated physical
+            port. A link aggregation interface has no port-ref; its
+            physical ports can be identified by following its
+            lower-layer-if entries to member interfaces and reading
+            their port-ref values, when the server reports those
+            relationships and correlations. This string does not enforce
+            the existence of the referenced inventory component.";
+       }
+     }
+
+     augment "/if:interfaces/if:interface" {
+       description
+         "Adds read-only inventory/topology correlations and commonly
+          needed interface attributes to the mounted RFC 8343 interface
+          list. IP addressing and per-family MTU are represented using
+          RFC 8344 (ietf-ip) when that module is included in the mounted
+          schema set. The base ietf-interfaces module remains unchanged.";
+
+       container inventory-ref {
+         config false;
+         description
+           "Correlation to a physical port component, if one is known.";
+         uses inventory-ref;
+       }
+
+       list topology-ref {
+         config false;
+         key "network-ref node-ref tp-ref";
+         description
+           "Zero or more topology termination points corresponding to
+            this interface. Interfaces may exist without participating in
+            any topology view; in that case, this list is not present.
+            An interface represented in multiple topology layers has one
+            entry per layer/view.";
+         uses topology-ref;
+       }
+
+       leaf vlan-id {
+         config false;
+         type uint16 { range "1..4094"; }
+         description
+           "Outer VLAN identifier (VLAN tag value) when applicable. This is
+            a convenience attribute: RFC 8343 can represent VLAN
+            subinterfaces, but does not define a standard leaf for the VLAN
+            tag value itself; implementations typically derive it from L2
+            configuration and/or topology attributes. When the interface is
+            not VLAN-tagged (for example, a physical parent interface), this
+            leaf is not present.";
+         reference
+           "RFC 8944; openconfig-vlan single-tagged vlan-id";
+       }
+       leaf controller-annotation {
+         config false;
+         type string;
+         description
+           "Optional controller-provided annotation for the interface.";
+       }
+     }
    }
-
-   list topology-ref {
-     config false;
-     key "network-ref node-ref tp-ref";
-     description
-       "Zero or more topology termination points corresponding to
-        this interface. Interfaces may exist without participating in
-        any topology view; in that case, this list is not present.
-        An interface represented in multiple topology layers has one
-        entry per layer/view.";
-     uses topology-ref;
-   }
-
-   leaf vlan-id {
-     config false;
-     type uint16 { range "1..4094"; }
-     description
-       "Outer VLAN identifier (VLAN tag value) when applicable. This is
-        a convenience attribute: RFC 8343 can represent VLAN
-        subinterfaces, but does not define a standard leaf for the VLAN
-        tag value itself; implementations typically derive it from L2
-        configuration and/or topology attributes. When the interface is
-        not VLAN-tagged (for example, a physical parent interface), this
-        leaf is not present.";
-     reference
-       "RFC 8944; openconfig-vlan single-tagged vlan-id";
-   }
-   leaf controller-annotation {
-     config false;
-     type string;
-     description
-       "Optional controller-provided annotation for the interface.";
-   }   } } ```
 
    <CODE ENDS>
 
@@ -560,10 +610,9 @@ Table of Contents
    against the mounted interfaces container.  URI path key values MUST
    be percent-encoded when they contain reserved characters:
 
-   http GET /restconf/data/inventory-network-interfaces:\ network-
-   interface-inventory/
-   device=RouterB.subdomain1.region3.isp.example.net/\ ietf-
-   interfaces:interfaces
+      GET /restconf/data/inventory-network-interfaces:\
+          network-interface-inventory/device=RouterB.subdomain1.region3.isp.example.net/\
+          ietf-interfaces:interfaces
 
    The response representation is the mounted "ietf-
    interfaces:interfaces" subtree plus augmentation data.  The requested
@@ -574,10 +623,10 @@ Table of Contents
 
 7.2.  Retrieve a Single Interface
 
-   http GET /restconf/data/inventory-network-interfaces:\ network-
-   interface-inventory/
-   device=RouterB.subdomain1.region3.isp.example.net/\ ietf-
-   interfaces:interfaces/\ interface=Bundle-Ether10
+      GET /restconf/data/inventory-network-interfaces:\
+          network-interface-inventory/device=RouterB.subdomain1.region3.isp.example.net/\
+          ietf-interfaces:interfaces/\
+          interface=Bundle-Ether10
 
 7.3.  Filtering by Interface Type
 
@@ -674,96 +723,120 @@ Table of Contents
 
 10.1.  Normative References
 
-   [RFC2119] Bradner, S., "Key words for use in RFCs to Indicate
-   Requirement Levels", BCP 14, RFC 2119, March 1997.
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
 
-   [RFC6991] Schoenwaelder, J., Ed., "Common YANG Data Types", RFC 6991,
-   July 2013.
+   [RFC6991]  Schoenwaelder, J., Ed., "Common YANG Data Types",
+              RFC 6991, DOI 10.17487/RFC6991, July 2013,
+              <https://www.rfc-editor.org/rfc/rfc6991>.
 
-   [RFC7950] Bjorklund, M., Ed., "The YANG 1.1 Data Modeling Language",
-   RFC 7950, August 2016.
+   [RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling Language",
+              RFC 7950, DOI 10.17487/RFC7950, August 2016,
+              <https://www.rfc-editor.org/rfc/rfc7950>.
 
-   [RFC7951] Lhotka, L., "JSON Encoding of Data Modeled with YANG", RFC
-   7951, August 2016.
+   [RFC7951]  Lhotka, L., "JSON Encoding of Data Modeled with YANG",
+              RFC 7951, DOI 10.17487/RFC7951, August 2016,
+              <https://www.rfc-editor.org/rfc/rfc7951>.
 
-   [RFC8040] Bierman, A., Bjorklund, M., and K.  Watsen, "RESTCONF
-   Protocol", RFC 8040, January 2017.
+   [RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
+              Protocol", RFC 8040, DOI 10.17487/RFC8040, January 2017,
+              <https://www.rfc-editor.org/rfc/rfc8040>.
 
-   [RFC8174] Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC 2119
-   Key Words", BCP 14, RFC 8174, May 2017.
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
-   [RFC8340] Bjorklund, M. and L.  Berger, Ed., "YANG Tree Diagrams",
-   BCP 215, RFC 8340, March 2018.
+   [RFC8340]  Bjorklund, M. and L. Berger, Ed., "YANG Tree Diagrams",
+              BCP 215, RFC 8340, DOI 10.17487/RFC8340, March 2018,
+              <https://www.rfc-editor.org/rfc/rfc8340>.
 
-   [RFC8341] Bierman, A. and M.  Bjorklund, "Network Configuration
-   Access Control Model", STD 91, RFC 8341, March 2018.
+   [RFC8341]  Bierman, A. and M. Bjorklund, "Network Configuration
+              Access Control Model", STD 91, RFC 8341,
+              DOI 10.17487/RFC8341, March 2018,
+              <https://www.rfc-editor.org/rfc/rfc8341>.
 
-   [RFC8343] Bjorklund, M., "A YANG Data Model for Interface
-   Management", RFC 8343, March 2018.
+   [RFC8343]  Bjorklund, M., "A YANG Data Model for Interface
+              Management", RFC 8343, DOI 10.17487/RFC8343, March 2018,
+              <https://www.rfc-editor.org/rfc/rfc8343>.
 
-   [RFC8345] Clemm, A., Medved, J., Varga, R., Bahadur, N.,
-   Ananthakrishnan, H., and X.  Liu, "A YANG Data Model for Network
-   Topologies", RFC 8345, March 2018.
+   [RFC8345]  Clemm, A., Medved, J., Varga, R., Bahadur, N.,
+              Ananthakrishnan, H., and X. Liu, "A YANG Data Model for
+              Network Topologies", RFC 8345, DOI 10.17487/RFC8345, March
+              2018, <https://www.rfc-editor.org/rfc/rfc8345>.
 
-   [RFC8407] Bierman, A., "Guidelines for Authors and Reviewers of
-   Documents Containing YANG Data Models", BCP 216, RFC 8407, October
-   2018.
+   [RFC8407]  Bierman, A., "Guidelines for Authors and Reviewers of
+              Documents Containing YANG Data Models", RFC 8407,
+              DOI 10.17487/RFC8407, October 2018,
+              <https://www.rfc-editor.org/rfc/rfc8407>.
 
-   [RFC8525] Bierman, A., Bjorklund, M., and K.  Watsen, "YANG Library",
-   RFC 8525, March 2019.
+   [RFC8525]  Bierman, A., Bjorklund, M., Schoenwaelder, J., Watsen, K.,
+              and R. Wilton, "YANG Library", RFC 8525,
+              DOI 10.17487/RFC8525, March 2019,
+              <https://www.rfc-editor.org/rfc/rfc8525>.
 
-   [RFC8528] Bjorklund, M. and L.  Lhotka, "YANG Schema Mount", RFC
-   8528, March 2019.
+   [RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
+              RFC 8528, DOI 10.17487/RFC8528, March 2019,
+              <https://www.rfc-editor.org/rfc/rfc8528>.
 
 10.2.  Informative References
 
-   [RFC8346] Clemm, A., Medved, J., Varga, R., Liu, X., Ananthakrishnan,
-   H., and N.  Bahadur, "A YANG Data Model for Layer 3 Topologies", RFC
-   8346, March 2018.
+   [GNMI]     "gRPC Network Management Interface (gNMI) Specification",
+              n.d., <https://github.com/openconfig/gnmi>.
 
-   [RFC8944] Dong, J., Wei, X., Wu, Q., Boucadair, M., and A.  Liu, "A
-   YANG Data Model for Layer 2 Network Topologies", RFC 8944, November
-   2020.
+   [IVY-INVENTORY]
+              "A YANG Data Model for Network and Network Element
+              Inventory", n.d., <https://datatracker.ietf.org/doc/draft-
+              ietf-ivy-network-inventory-yang/>.
 
-   [IVY-INVENTORY] "A YANG Data Model for Network and Network Element
-   Inventory", draft-ietf-ivy-network-inventory-yang-19 (work in
-   progress).
+   [IVY-TOPOLOGY]
+              "A YANG Data Model for Network Inventory Topology", n.d.,
+              <https://datatracker.ietf.org/doc/draft-ietf-ivy-network-
+              inventory-topology/>.
 
-   [IVY-TOPOLOGY] "A YANG Data Model for Network Inventory Topology",
-   draft-ietf-ivy-network-inventory-topology-11 (work in progress).
+   [OC-AGGREGATE]
+              "OpenConfig Aggregate Interface Model", n.d.,
+              <https://github.com/openconfig/public/blob/master/release/
+              models/interfaces/openconfig-if-aggregate.yang>.
 
-   [OC-INTERFACES] OpenConfig Working Group, "openconfig-
-   interfaces.yang", OpenConfig public models repository
-   (github.com/openconfig/public), 'mtu' leaf.
+   [OC-ETHERNET]
+              "OpenConfig Ethernet Model", n.d.,
+              <https://github.com/openconfig/public/blob/master/release/
+              models/interfaces/openconfig-if-ethernet.yang>.
 
-   [OC-ETHERNET] OpenConfig Working Group, "openconfig-if-
-   ethernet.yang", OpenConfig public models repository, 'auto-negotiate'
-   leaves.
+   [OC-IF-IP] "OpenConfig IP Interface Model", n.d.,
+              <https://github.com/openconfig/public/blob/master/release/
+              models/interfaces/openconfig-if-ip.yang>.
 
-   [OC-AGGREGATE] OpenConfig Working Group, "openconfig-if-
-   aggregate.yang", OpenConfig public models repository,
-   'aggregation/state/member' and 'ethernet/config/ aggregate-id'
-   leaves.
+   [OC-INTERFACES]
+              "OpenConfig Interfaces Model", n.d.,
+              <https://github.com/openconfig/public/blob/master/release/
+              models/interfaces/openconfig-interfaces.yang>.
 
-   [OC-VLAN] OpenConfig Working Group, "openconfig-vlan.yang",
-   OpenConfig public models repository, 'vlan/match/single-
-   tagged/config/vlan-id' leaf.
+   [OC-PLATFORM-PORT]
+              "OpenConfig Platform Port Model", n.d.,
+              <https://github.com/openconfig/public/blob/master/release/
+              models/platform/openconfig-platform-port.yang>.
 
-   [OC-IF-IP] OpenConfig Working Group, "openconfig-if-ip.yang",
-   OpenConfig public models repository, 'ipv4/addresses/address/config/
-   ip' leaf.
+   [OC-TERMINAL-DEVICE]
+              "OpenConfig Terminal Device Model", n.d.,
+              <https://github.com/openconfig/public/blob/master/release/
+              models/optical-transport/openconfig-terminal-device.yang>.
 
-   [OC-TERMINAL-DEVICE] OpenConfig Working Group, "openconfig-terminal-
-   device. yang", OpenConfig public models repository, 'logical-
-   channels/channel/config/{rate-class, trib-protocol}' leaves.
+   [OC-VLAN]  "OpenConfig VLAN Model", n.d.,
+              <https://github.com/openconfig/public/blob/master/release/
+              models/vlan/openconfig-vlan.yang>.
 
-   [OC-PLATFORM-PORT] OpenConfig Working Group, "openconfig-platform-
-   port. yang", OpenConfig public models repository, 'hardware-port'
-   leaf.
+   [RFC8346]  Clemm, A., Medved, J., Varga, R., Liu, X.,
+              Ananthakrishnan, H., and N. Bahadur, "A YANG Data Model
+              for Layer 3 Topologies", RFC 8346, DOI 10.17487/RFC8346,
+              March 2018, <https://www.rfc-editor.org/rfc/rfc8346>.
 
-   [GNMI] OpenConfig Working Group, "gRPC Network Management Interface
-   (gNMI) Specification", OpenConfig public reference repository, gNMI
-   specification.
+   [RFC8944]  Dong, J., Wei, X., Wu, Q., Boucadair, M., and A. Liu, "A
+              YANG Data Model for Layer 2 Network Topologies", RFC 8944,
+              DOI 10.17487/RFC8944, November 2020,
+              <https://www.rfc-editor.org/rfc/rfc8944>.
 
 Appendix A.  Full Worked Example (mobilecore.region3)
 
@@ -892,39 +965,116 @@ A.2.  Interface Inventory Representation
    from a live device.  In the RFC 7951 encoding below, phys-address is
    base64 because ietf-interfaces defines it using the YANG binary type.
 
-   json { "inventory-network-interfaces:network-interface-inventory": {
-   "device": [ { "ne-ref": "RouterB.subdomain1.region3.isp.example.net",
-   "ietf-interfaces:interfaces": { "interface": [ { "name":
-   "TenGigE0/1/0/0", "type": "iana-if-type:ethernetCsmacd", "admin-
-   status": "up", "oper-status": "up", "if-index": 10, "phys-address":
-   "qrvMCwEA", "speed": "10000000000", "higher-layer-if": [ "Bundle-
-   Ether10" ], "lower-layer-if": [], "device-interface-
-   attributes:inventory-ref": { "port-ref": "TenGigE0/1/0/0" }, "device-
-   interface-attributes:topology-ref": [ { "network-ref":
-   "mobilecore.region3.l2", "node-ref":
-   "RouterB.subdomain1.region3.isp.example.net", "tp-ref":
-   "TenGigE0/1/0/0" } ] }, { "name": "TenGigE0/1/0/1", "type": "iana-if-
-   type:ethernetCsmacd", "admin-status": "up", "oper-status": "up",
-   "higher-layer-if": [ "Bundle-Ether10" ], "lower-layer-if": [], }, {
-   "name": "Bundle-Ether10", "type": "iana-if-type:ieee8023adLag",
-   "admin-status": "up", "oper-status": "up", "higher-layer-if": [],
-   "lower-layer-if": [ "TenGigE0/1/0/0", "TenGigE0/1/0/1" ], "ietf-
-   ip:ipv4": { "mtu": 9216, "address": [ { "ip": "198.51.100.0",
-   "prefix-length": 32 } ] } }, { "name": "TenGigE0/2/0/0", "type":
-   "iana-if-type:ethernetCsmacd", "admin-status": "up", "oper-status":
-   "up", "higher-layer-if": [ "TenGigE0/2/0/0.100",
-   "TenGigE0/2/0/0.200", "TenGigE0/2/0/0.300" ], "lower-layer-if": [] },
-   { "name": "TenGigE0/2/0/0.100", "type": "iana-if-type:l2vlan",
-   "admin-status": "up", "oper-status": "up", "higher-layer-if": [],
-   "lower-layer-if": [ "TenGigE0/2/0/0" ], "device-interface-
-   attributes:vlan-id": 100, "ietf-ip:ipv4": { "mtu": 1500, "address": [
-   { "ip": "192.0.2.1", "prefix-length": 24 } ] } }, { "name":
-   "TenGigE0/2/0/1", "type": "iana-if-type:ethernetCsmacd", "admin-
-   status": "down", "oper-status": "down", "higher-layer-if": [],
-   "lower-layer-if": [], "device-interface-attributes:inventory-ref": {
-   "port-ref": "TenGigE0/2/0/1" }, "device-interface-
-   attributes:controller-annotation": "Inventory-only physical port; no
-   topology termination point or link" } ] } } ] } }
+      {
+     "inventory-network-interfaces:network-interface-inventory": {
+       "device": [
+         {
+           "ne-ref": "RouterB.subdomain1.region3.isp.example.net",
+           "ietf-interfaces:interfaces": {
+             "interface": [
+               {
+                 "name": "TenGigE0/1/0/0",
+                 "type": "iana-if-type:ethernetCsmacd",
+                 "admin-status": "up",
+                 "oper-status": "up",
+                 "if-index": 10,
+                 "phys-address": "qrvMCwEA",
+                 "speed": "10000000000",
+                 "higher-layer-if": [
+                   "Bundle-Ether10"
+                 ],
+                 "lower-layer-if": [],
+                 "device-interface-attributes:inventory-ref": {
+                   "port-ref": "TenGigE0/1/0/0"
+                 },
+                 "device-interface-attributes:topology-ref": [
+                   {
+                     "network-ref": "mobilecore.region3.l2",
+                     "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                     "tp-ref": "TenGigE0/1/0/0"
+                   }
+                 ]
+               },
+               {
+                 "name": "TenGigE0/1/0/1",
+                 "type": "iana-if-type:ethernetCsmacd",
+                 "admin-status": "up",
+                 "oper-status": "up",
+                 "higher-layer-if": [
+                   "Bundle-Ether10"
+                 ],
+                 "lower-layer-if": []
+               },
+               {
+                 "name": "Bundle-Ether10",
+                 "type": "iana-if-type:ieee8023adLag",
+                 "admin-status": "up",
+                 "oper-status": "up",
+                 "higher-layer-if": [],
+                 "lower-layer-if": [
+                   "TenGigE0/1/0/0",
+                   "TenGigE0/1/0/1"
+                 ],
+                 "ietf-ip:ipv4": {
+                   "mtu": 9216,
+                   "address": [
+                     {
+                       "ip": "198.51.100.0",
+                       "prefix-length": 32
+                     }
+                   ]
+                 }
+               },
+               {
+                 "name": "TenGigE0/2/0/0",
+                 "type": "iana-if-type:ethernetCsmacd",
+                 "admin-status": "up",
+                 "oper-status": "up",
+                 "higher-layer-if": [
+                   "TenGigE0/2/0/0.100",
+                   "TenGigE0/2/0/0.200",
+                   "TenGigE0/2/0/0.300"
+                 ],
+                 "lower-layer-if": []
+               },
+               {
+                 "name": "TenGigE0/2/0/0.100",
+                 "type": "iana-if-type:l2vlan",
+                 "admin-status": "up",
+                 "oper-status": "up",
+                 "higher-layer-if": [],
+                 "lower-layer-if": [
+                   "TenGigE0/2/0/0"
+                 ],
+                 "device-interface-attributes:vlan-id": 100,
+                 "ietf-ip:ipv4": {
+                   "mtu": 1500,
+                   "address": [
+                     {
+                       "ip": "192.0.2.1",
+                       "prefix-length": 24
+                     }
+                   ]
+                 }
+               },
+               {
+                 "name": "TenGigE0/2/0/1",
+                 "type": "iana-if-type:ethernetCsmacd",
+                 "admin-status": "down",
+                 "oper-status": "down",
+                 "higher-layer-if": [],
+                 "lower-layer-if": [],
+                 "device-interface-attributes:inventory-ref": {
+                   "port-ref": "TenGigE0/2/0/1"
+                 },
+                 "device-interface-attributes:controller-annotation": "Inventory-only physical port; no topology termination point or link"
+               }
+             ]
+           }
+         }
+       ]
+     }
+   }
 
    Note how "higher-layer-if"/"lower-layer-if" give the LAG<->member and
    VLAN<->parent relationships directly, in both directions, with no
@@ -952,31 +1102,43 @@ Appendix B.  Comparison Against Commonly Implemented Interface
    (Section 6)", and attributes judged out of scope for this revision
    are marked "deferred" with a one-line reason.
 
-   text
-   +==========================+====================+==================+ |
-   Commonly implemented | Disposition | Notes | | interface
-   attribute | | |
-   +==========================+====================+==================+ |
-   port/interface name | covered | if:name | | (various forms) | | | |
-   description | covered | if:description | | interface type | covered |
-   if:type | | admin status, | covered | if:admin-status, | |
-   operational status | | if:oper-status | | interface index | covered |
-   if:if-index | | MAC / physical address | covered | if:phys-
-   address | | interface speed | covered | if:speed | | link up/down
-   trap enable | covered | if:link-up-down- | | | | trap-enable | |
-   maximum transmission unit | covered | ietf-ip:ipv4/mtu,| | (MTU) | |
-   ietf-ip:ipv6/mtu | | | | (RFC 8344) | | state | | | | separate port,
-   connector, and | deferred | distinct | | equipment identifiers | |
-   connector-vs- | | | | port identity | | | | not modeled; | | | |
-   'inventory-ref. | | | | port-ref' is an | | | | approximation | |
-   physical connector presence | deferred | optics-presence | | flag | |
-   not modeled | | promiscuous-mode flag, SPAN/ | deferred | niche/
-   internal; | | RSPAN monitoring flag, | | no operator- | | internal
-   location index, | | facing need | | soak timers, supported MTU | |
-   identified yet | | range, shared risk resource | | | | group id,
-   entity alias | | | | mapping identifier, LAG end | | | | identifier,
-   alias name | | |
-   +==========================+====================+==================+
++==========================+====================+==================+
+| Commonly implemented      | Disposition        | Notes            |
+| interface attribute       |                     |                  |
++==========================+====================+==================+
+| port/interface name        | covered            | if:name          |
+|   (various forms)          |                    |                  |
+| description                | covered            | if:description   |
+| interface type              | covered           | if:type          |
+| admin status,                | covered         | if:admin-status, |
+|   operational status          |                 | if:oper-status   |
+| interface index              | covered           | if:if-index      |
+| MAC / physical address       | covered           | if:phys-address  |
+| interface speed               | covered          | if:speed         |
+| link up/down trap enable      | covered          | if:link-up-down- |
+|                               |                   |  trap-enable    |
+| maximum transmission unit      | covered          | ietf-ip:ipv4/mtu,|
+|   (MTU)                        |                  | ietf-ip:ipv6/mtu |
+|                                |                  | (RFC 8344)       |
+|   state                         |               |                 |
+| separate port, connector, and    | deferred     | distinct        |
+|   equipment identifiers          |              | connector-vs-   |
+|                                   |              | port identity   |
+|                                   |              | not modeled;    |
+|                                   |              | 'inventory-ref. |
+|                                   |              | port-ref' is an |
+|                                   |              | approximation   |
+| physical connector presence       | deferred    | optics-presence |
+|   flag                            |             | not modeled     |
+| promiscuous-mode flag, SPAN/      | deferred     | niche/internal; |
+|   RSPAN monitoring flag,          |              |  no operator-   |
+|   internal location index,        |             |  facing need    |
+|   soak timers, supported MTU      |              |  identified yet |
+|   range, shared risk resource     |              |                 |
+|   group id, entity alias          |              |                 |
+|   mapping identifier, LAG end     |              |                 |
+|   identifier, alias name          |              |                 |
++==========================+====================+==================+
 
    Table 2: Commonly implemented attribute comparison
 
