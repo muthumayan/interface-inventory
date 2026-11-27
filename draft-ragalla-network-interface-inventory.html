@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Network-wide Interface Inventory</title>
+<meta content="Ramkrishna Galla" name="author">
+<meta content="Muthumayan Madhayyan" name="author">
+<meta content="
+       This document defines a YANG data model for a network-wide inventory of
+physical and logical interfaces, organized by network element. The model
+provides interface attributes, operational state, and layering
+relationships, with correlations to network inventory and topology data. 
+    " name="description">
+<meta content="xml2rfc 3.35.0" name="generator">
+<meta content="interface inventory" name="keyword">
+<meta content="YANG" name="keyword">
+<meta content="schema mount" name="keyword">
+<meta content="network topology" name="keyword">
+<meta content="draft-ragalla-network-interface-inventory-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.35.0
+    Python 3.14.10
+    ConfigArgParse 1.10.1
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.14.7
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.9.4
+-->
+<link href="draft-ragalla-network-interface-inventory.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill], [fill] *)) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Network Interface Inventory</td>
+<td class="right">October 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Galla &amp; Madhayyan</td>
+<td class="center">Expires 2 May 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">IVY Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-ragalla-network-interface-inventory-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-10-29" class="published">29 October 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-05-02">2 May 2027</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">R. Galla</div>
+<div class="org">Cisco Systems, Inc.</div>
+</div>
+<div class="author">
+      <div class="author-name">M. Madhayyan</div>
+<div class="org">Cisco Systems, Inc.</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Network-wide Interface Inventory</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document defines a YANG data model for a network-wide inventory of
+physical and logical interfaces, organized by network element. The model
+provides interface attributes, operational state, and layering
+relationships, with correlations to network inventory and topology data.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://datatracker.ietf.org/doc/draft-ragalla-device-interface-inventory/">https://datatracker.ietf.org/doc/draft-ragalla-device-interface-inventory/</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-ragalla-network-interface-inventory/">https://datatracker.ietf.org/doc/draft-ragalla-network-interface-inventory/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        IVY Working Group mailing list (<span><a href="mailto:ivy@ietf.org">mailto:ivy@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/ivy/">https://mailarchive.ietf.org/arch/browse/ivy/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/ivy/">https://www.ietf.org/mailman/listinfo/ivy/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/https://github.com/muthumayan/interface-inventory">https://github.com/https://github.com/muthumayan/interface-inventory</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 2 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-terminology" class="internal xref">Conventions and Terminology</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-problem-statement" class="internal xref">Problem Statement</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-relationship-to-existing-wo" class="internal xref">Relationship to Existing Work</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-data-model-overview" class="internal xref">Data Model Overview</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-design-summary" class="internal xref">Design Summary</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-tree-diagram" class="internal xref">Tree Diagram</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-augmentation-overview" class="internal xref">Augmentation Overview</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-yang-modules" class="internal xref">YANG Modules</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-parent-module-inventory-net" class="internal xref">Parent module: inventory-network-interfaces</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-mounted-augmentation-device" class="internal xref">Mounted augmentation: device-interface-attributes</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-restconf-operations" class="internal xref">RESTCONF Operations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-retrieve-all-interfaces-on-" class="internal xref">Retrieve All Interfaces on a Device</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-retrieve-a-single-interface" class="internal xref">Retrieve a Single Interface</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-filtering-by-interface-type" class="internal xref">Filtering by Interface Type</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-protocol-buffers-encoding-f" class="internal xref">Protocol Buffers Encoding for Streaming Clients</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-full-worked-example-mobilec" class="internal xref">Full Worked Example (mobilecore.region3)</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1">
+                <p id="section-toc.1-1.11.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-example-network-and-illustr" class="internal xref">Example Network and Illustrative Goals</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
+                <p id="section-toc.1-1.11.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-interface-inventory-represe" class="internal xref">Interface Inventory Representation</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-comparison-against-commonly" class="internal xref">Comparison Against Commonly Implemented Interface Attributes</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-openconfig-comparisons" class="internal xref">OpenConfig Comparisons</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
+                <p id="section-toc.1-1.13.2.1.1"><a href="#appendix-C.1" class="auto internal xref">C.1</a>.  <a href="#name-interface-layering" class="internal xref">Interface Layering</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
+                <p id="section-toc.1-1.13.2.2.1"><a href="#appendix-C.2" class="auto internal xref">C.2</a>.  <a href="#name-attribute-comparisons" class="internal xref">Attribute Comparisons</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Network operators and management systems need a consistent inventory
+of physical and logical interfaces across network elements. Such an
+inventory supports per-device retrieval of interface attributes and
+state, as well as correlation with network inventory and topology models.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">An SDN controller can expose this inventory to northbound clients, such
+as higher-level controllers and automation systems, to support
+network-wide operations.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">RFC 8343 [RFC8343] defines interface data, including operational state
+and interface-layering relationships, for a server. The IVY network
+inventory model [IVY-INVENTORY] describes network elements and their
+components, while RFC 8345 [RFC8345] and the IVY inventory topology
+model [IVY-TOPOLOGY] describe topology and its relationship to inventory.
+These models provide complementary information.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This document defines a network-wide interface inventory organized by
+network element. It reuses RFC 8343 interface data and provides
+correlations to network inventory and topology. Sections 5 and 6
+describe the data model, Section 7 describes operations, and Appendix
+A provides a worked example. Discovery and reconciliation of the
+underlying data are implementation-specific.<a href="#section-1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conventions-and-terminology">
+<section id="section-2">
+      <h2 id="name-conventions-and-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-terminology" class="section-name selfRef">Conventions and Terminology</a>
+      </h2>
+<p id="section-2-1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+"MAY", and "OPTIONAL" in this document are to be interpreted as
+described in BCP 14 [RFC2119] [RFC8174] when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">Tree diagrams used in this document follow the notation defined in
+[RFC8340].<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">The terms "network element" (NE), "component", and "port" are
+used as defined in [IVY-INVENTORY].  The terms "network", "node",
+"termination point" (TP), and "supporting-node"/"supporting-
+termination-point" are used as defined in [RFC8345].<a href="#section-2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="problem-statement">
+<section id="section-3">
+      <h2 id="name-problem-statement">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-problem-statement" class="section-name selfRef">Problem Statement</a>
+      </h2>
+<p id="section-3-1">A SDN controller may collect interface data from multiple network elements. RFC 8343 provides an interface model for a network-element, including interface state and layering. The controller also keeps an inventory of all network elements and their physical component inventory. Depending on the layer in which the controller operates it also keeps track of the topological view of the network (L1, L2 or L3).<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">The IVY inventory model [IVY-INVENTORY] describes the network-element inventory, while RFC 8345 [RFC8345] and the IVY inventory topology model [IVY-TOPOLOGY] describe topology and its relationship to inventory. While these models are self-sufficient in mapping topology to physical inventory, they lack the relationship that ties the packet forwarding construct (a.k.a interfaces) to the physical inventory.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3">A northbound client (like a multi-domain controller or an OSS) would need to correlate information from several datasets (inventory, topology, interfaces) in order to reconstruct a network wide view.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-4">As an example, a controller can learn from the RFC 8345 topology model which link connects two network devices. If that link is realized as a link aggregation group (LAG) and the link degrades (for example, due to loss/errors on one member), troubleshooting typically requires identifying the member interfaces of the LAG on each device. A controller may already collect the LAG and member-interface relationships while building its topology view, but RFC 8345 does not provide a device-scoped interface inventory (with layering) that can be correlated directly to the topology termination points.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5">This document's proposed model allows the controller to expose that per-device interface inventory and its correlations northbound, so that clients can navigate from a topology link to the underlying per-device member interfaces.<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6">As another example, a northbound performance management system may want to correlate the topological state with performance metrics from specific interfaces. Mere knowledge of physical ports and of termination points may not suffice when LAG or VLAN interfaces are involved.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">This proposed model aggregates interface information from multiple network devices and presents them contextually combining inventory and topological references. The model's
+completeness and accuracy depend on the data available to the server and on the controller's discovery and reconciliation mechanisms.<a href="#section-3-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="relationship-to-existing-work">
+<section id="section-4">
+      <h2 id="name-relationship-to-existing-wo">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-relationship-to-existing-wo" class="section-name selfRef">Relationship to Existing Work</a>
+      </h2>
+<p id="section-4-1">RFC 8343 [RFC8343] Section 3.3 ("Interface Layering") already defines the generic mechanism this document needs: two read-only leaf-lists, "higher-layer-if" and "lower-layer-if", present on every "/interfaces/interface" entry, explicitly described as the YANG equivalent of the IF-MIB "ifStackTable" (RFC 8343 Section 4). A LAG's members populate the LAG's "lower-layer-if"; each member's "higher-layer-if" points back at the LAG.  A VLAN sub-interface's "lower-layer-if" points at its parent physical interface.  This document does not redefine LAG or VLAN semantics; it relies
+entirely on RFC 8343 Section 3.3 for interface stacking.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">RFC 8528 [RFC8528] ("YANG Schema Mount") defines a mechanism for attaching a schema tree at a mount point. Appendix A illustrates device/LNE-scoped mounted data, but does not prescribe a device key or require one mount per device. This proposal chooses that organization as a data-model design. It uses separate parent and mounted modules. RFC 8528 confines paths in a mounted schema to the mount jail; therefore the mounted augmentation represents cross-model inventory/topology identifiers as strings rather than leafrefs into parent-schema data. A server may use shared-schema
+parent-reference metadata for XPath evaluation, but this proposal does not require it. This document does not change RFC 8345, RFC 8346, RFC 8944, or the IVY drafts.<a href="#section-4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="data-model-overview">
+<section id="section-5">
+      <h2 id="name-data-model-overview">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-data-model-overview" class="section-name selfRef">Data Model Overview</a>
+      </h2>
+<div id="design-summary">
+<section id="section-5.1">
+        <h3 id="name-design-summary">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-design-summary" class="section-name selfRef">Design Summary</a>
+        </h3>
+<ul class="normal">
+<li class="normal" id="section-5.1-1.1">
+            <p id="section-5.1-1.1.1">"network-interface-inventory/device" is keyed by "ne-ref", a leafref into the IVY "network-element" list -- the same device identifier already used by inventory, so no new device identity scheme is introduced.<a href="#section-5.1-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.1-1.2">
+            <p id="section-5.1-1.2.1">Each "device" list entry is an RFC 8528 mount point labeled "interfaces-root", under which the server exposes a mounted "ietf-interfaces:interfaces" subtree. The server advertises the mounted module set in schema-mount/YANG Library data.<a href="#section-5.1-1.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.1-1.3">
+            <p id="section-5.1-1.3.1">Every "if:interface" entry in that mounted subtree is augmented (Section 6) with:<a href="#section-5.1-1.3.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-1.3.2.1">
+                <p id="section-5.1-1.3.2.1.1">an "inventory-ref" carrying the IVY port component identifier, when one is known, within the network element identified by the enclosing device's "ne-ref"; and<a href="#section-5.1-1.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-1.3.2.2">
+                <p id="section-5.1-1.3.2.2.1">zero or more "topology-ref" entries carrying string identifiers for the RFC 8345 network/node/termination-point views corresponding to the interface. Interfaces may exist without participating in any topology view; in that case, the "topology-ref" list is not present; and<a href="#section-5.1-1.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-1.3.2.3">
+                <p id="section-5.1-1.3.2.3.1">a "vlan-id" convenience leaf populated from the corresponding RFC 8944-style topology attributes, so a client does not have to dereference "topology-ref" just to read a VLAN tag. RFC 8343 can represent VLAN subinterfaces and their layering relationships, but it does not define a standard leaf for the VLAN tag value itself.<a href="#section-5.1-1.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.1-1.3.2.4">
+                <p id="section-5.1-1.3.2.4.1">IP addressing and per-family MTU are represented using RFC 8344 (ietf-ip) within the mounted schema set, rather than being duplicated as additional augmentation leaves.<a href="#section-5.1-1.3.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-5.1-1.4">
+            <p id="section-5.1-1.4.1">"higher-layer-if" and "lower-layer-if" are NOT redefined; they are inherited unmodified from RFC 8343. The server populates this operational view from device/interface data and available LAG/VLAN relationships; the discovery and reconciliation mechanism is implementation-specific.<a href="#section-5.1-1.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.1-2">The following illustration shows the hierarchy and example correlations.
+Device identifiers are abbreviated, and RouterX represents another
+network element. Arrows indicate relationships, not data containment.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3"><code>text
+network-interface-inventory
+|
++-- device [ne-ref = RouterA] [mount point: interfaces-root]
+|   +-- interfaces ...
+|
++-- device [ne-ref = RouterB] [mount point: interfaces-root]
+|   +-- interfaces
+|       +-- interface [Bundle-Ether10]
+|       |   +-- lower-layer-if --&gt; TenGigE0/1/0/0
+|       |   +-- topology-ref -----&gt; network / node / TP
+|       |
+|       +-- interface [TenGigE0/1/0/0]
+|           +-- higher-layer-if -&gt; Bundle-Ether10
+|           +-- inventory-ref ---&gt; port component in RouterB
+|           +-- topology-ref -----&gt; network / node / TP
+|
+|   ...
+|
++-- device [ne-ref = RouterX] [mount point: interfaces-root]
+    +-- interfaces ...
+</code><a href="#section-5.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="tree-diagram">
+<section id="section-5.2">
+        <h3 id="name-tree-diagram">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-tree-diagram" class="section-name selfRef">Tree Diagram</a>
+        </h3>
+<p id="section-5.2-1">Parent schema module: inventory-network-interfaces<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2"><code>text
+  +--ro network-interface-inventory
+     +--ro device* [ne-ref]
+        +--ro ne-ref             -&gt; /nei:network-inventory/.../ne-id
+        +--mp interfaces-root
+           (mounted schema set includes ietf-interfaces, ietf-ip, and
+            device-interface-attributes)
+</code><a href="#section-5.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.2-3">Mounted schema augmentation module:
+device-interface-attributes<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+<p id="section-5.2-4"><code>text
+  augment /if:interfaces/if:interface:
+    +--ro inventory-ref?
+    |  +--ro port-ref?      string
+    +--ro topology-ref* [network-ref node-ref tp-ref]
+    |  +--ro network-ref    string
+    |  +--ro node-ref       string
+    |  +--ro tp-ref         string
+    +--ro vlan-id?                  uint16
+    +--ro controller-annotation?    string
+</code><a href="#section-5.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="augmentation-overview">
+<section id="section-5.3">
+        <h3 id="name-augmentation-overview">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-augmentation-overview" class="section-name selfRef">Augmentation Overview</a>
+        </h3>
+<p id="section-5.3-1">The mounted interface augmentation provides three categories of information:<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-2.1">
+            <p id="section-5.3-2.1.1">Correlation identifiers to connect per-device interface entries to inventory and topology views.<a href="#section-5.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-2.2">
+            <p id="section-5.3-2.2.1">Convenience leaves derived from topology data, so clients do not need to dereference topology termination points to retrieve a VLAN tag value. RFC 8343 can represent VLAN subinterfaces, but does not define a standard leaf for the VLAN tag value.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-2.3">
+            <p id="section-5.3-2.3.1">An optional controller-provided annotation for information that is specific to the controller's inventory view.<a href="#section-5.3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-2.4">
+            <p id="section-5.3-2.4.1">Most common interface attributes are already addressed in RFC 8343. There are
+other interesting interface attributes such IP addressing and IPv4/IPv6 MTU. These  are provided by RFC 8344 (ietf-ip) which in turn builds on RFC 8343.<a href="#section-5.3-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.3-3">Normative definitions for the augmentation are in the YANG modules in
+Section 6. Examples are in Appendix A. Informative comparisons and
+mappings are in Appendices B and C.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.3-4"><code>text
+   +=======================+==============================+
+   | Node(s)               | Purpose                      |
+   +=======================+==============================+
+   | inventory-ref         | Correlate to inventory port  |
+   | topology-ref          | Correlate to topology TP(s)  |
+   | vlan-id               | Convenience VLAN tag value   |
+   | controller-annotation | Controller annotation        |
+   +================+=====================================+
+</code><a href="#section-5.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="yang-modules">
+<section id="section-6">
+      <h2 id="name-yang-modules">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-yang-modules" class="section-name selfRef">YANG Modules</a>
+      </h2>
+<p id="section-6-1">The model is split to respect RFC 8528 mount-jail semantics. The parent module is loaded in the management system's parent schema. At each mount point, the server advertises a mounted schema set that includes ietf-interfaces, ietf-ip, and device-interface-attributes.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">The same mounted module set MAY be shared by all devices when their schemas are identical. The server MUST publish the applicable mount-point schema through RFC 8528 schema-mount data and the YANG Library mechanism (RFC 8525).<a href="#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-6-3">The mounted augmentation contains no leafref into the parent inventory or topology trees. Its cross-model correlation values are strings: RFC 8528 confines mounted paths to the mount jail unless a server configures shared-schema parent-reference metadata. This proposal does not require parent-reference metadata.<a href="#section-6-3" class="pilcrow">¶</a></p>
+<div id="parent-module-inventory-network-interfaces">
+<section id="section-6.1">
+        <h3 id="name-parent-module-inventory-net">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-parent-module-inventory-net" class="section-name selfRef">Parent module: inventory-network-interfaces</a>
+        </h3>
+<p id="section-6.1-1">&lt;CODE BEGINS&gt; file "inventory-network-interfaces@2026-10-29.yang"<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">```yang
+module inventory-network-interfaces {
+  yang-version 1.1;
+  namespace "urn:example:ns:yang:inventory-network-interfaces";
+  prefix "inii";<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">import ietf-yang-schema-mount { prefix yangmnt; }
+  import ietf-network-inventory { prefix nei; }<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-4">organization "TBD";
+  contact "TBD";<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+<p id="section-6.1-5">description
+    "Parent data model for a device-scoped interface inventory facade.
+     It identifies a network element and defines an RFC 8528 schema
+     mount point where the mounted schema set contains ietf-interfaces,
+     ietf-ip, and device-interface-attributes.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.1-6">
+<pre>
+ The module does not define an HTTP API. A server may expose the
+ device list and mounted interface data through NETCONF, RESTCONF,
+ or another management interface.";
+</pre><a href="#section-6.1-6" class="pilcrow">¶</a>
+</div>
+<p id="section-6.1-7">revision 2026-11-24 {
+    description
+      "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
+       leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
+       and per-family MTU within the mounted schema set, and relies on
+       RFC 8343 if:speed for interface capacity.";
+    reference "draft-ragalla-network-interface-inventory";
+  }<a href="#section-6.1-7" class="pilcrow">¶</a></p>
+<p id="section-6.1-8">revision 2026-10-29 {
+    description
+      "-03 revision. Parent mount wrapper is unchanged; the mounted
+       augmentation no longer includes alarm attributes.";
+    reference "draft-ragalla-device-interface-inventory-03";
+  }<a href="#section-6.1-8" class="pilcrow">¶</a></p>
+<p id="section-6.1-9">revision 2026-10-13 {
+    description
+      "Initial -02 parent/child split. The parent device mount wrapper
+       is separate from the mounted interface augmentation.";
+    reference "draft-ragalla-device-interface-inventory-02";
+  }<a href="#section-6.1-9" class="pilcrow">¶</a></p>
+<p id="section-6.1-10">container network-interface-inventory {
+    config false;
+    description
+      "Network-wide interface inventory organized by network element.";<a href="#section-6.1-10" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.1-11">
+<pre>
+list device {
+  key "ne-ref";
+  description
+    "One entry for each network element served by this management
+     system. The ne-ref leafref is evaluated in the parent schema,
+     outside the mounted schema jail. The server advertises the
+     mounted schema through RFC 8528 schema-mounts data, using an
+     inline or shared-schema entry as appropriate. For this
+     read-only inventory view, the schema-mount config value MUST
+     be false. The mounted module set MUST include ietf-interfaces,
+     ietf-ip, and device-interface-attributes.";
+
+  leaf ne-ref {
+    type leafref {
+      path "/nei:network-inventory/nei:network-elements/"
+         + "nei:network-element/nei:ne-id";
+    }
+    description
+      "Identifier of the network element owning the mounted
+       interface list.";
+  }
+
+  yangmnt:mount-point "interfaces-root" {
+    description
+      "RFC 8528 mount point for the per-device interface model.";
+  }
+}   } } ```
+</pre><a href="#section-6.1-11" class="pilcrow">¶</a>
+</div>
+<p id="section-6.1-12">&lt;CODE ENDS&gt;<a href="#section-6.1-12" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="mounted-augmentation-device-interface-attributes">
+<section id="section-6.2">
+        <h3 id="name-mounted-augmentation-device">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-mounted-augmentation-device" class="section-name selfRef">Mounted augmentation: device-interface-attributes</a>
+        </h3>
+<p id="section-6.2-1">&lt;CODE BEGINS&gt; file "device-interface-attributes@2026-11-24.yang"<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">```yang
+module device-interface-attributes {
+  yang-version 1.1;
+  namespace "urn:example:ns:yang:device-interface-attributes";
+  prefix "edia";<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-3">import ietf-interfaces  { prefix if; }<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.2-4">organization "TBD";
+  contact "TBD";<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+<p id="section-6.2-5">description
+    "Read-only augmentation of a mounted ietf-interfaces schema for
+     device-scoped interface inventory. This module is intended to be
+     included in the mounted schema set at the interfaces-root mount point
+     defined by inventory-network-interfaces.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.2-6">
+<pre>
+ RFC 8528 confines a mounted schema to its mount jail. Therefore,
+ inventory-ref and topology-ref values are correlation identifiers
+ represented as strings; the mounted module does not use leafrefs
+ that cross into the parent inventory or topology schema.";
+</pre><a href="#section-6.2-6" class="pilcrow">¶</a>
+</div>
+<p id="section-6.2-7">revision 2026-11-24 {
+    description
+      "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
+       leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
+       and per-family MTU within the mounted schema set, and relies on
+       RFC 8343 if:speed for interface capacity.";
+    reference "draft-ragalla-network-interface-inventory";
+  }<a href="#section-6.2-7" class="pilcrow">¶</a></p>
+<p id="section-6.2-8">revision 2026-10-29 {
+    description
+      "-03 revision. Removes current-alarm-severity and alarm-ref from
+       the mounted interface augmentation. All remaining augmentation
+       data is operational/read-only; cross-mount correlations use
+       string identifiers to respect the RFC 8528 mount-jail boundary.";
+    reference "draft-ragalla-device-interface-inventory-03";
+  }<a href="#section-6.2-8" class="pilcrow">¶</a></p>
+<p id="section-6.2-9">revision 2026-10-13 {
+    description
+      "Initial -02 mounted-interface augmentation. All augmentation
+       data is operational/read-only. Cross-mount correlations use
+       string identifiers to respect the RFC 8528 mount-jail boundary.";
+    reference "draft-ragalla-device-interface-inventory-02";
+  }<a href="#section-6.2-9" class="pilcrow">¶</a></p>
+<p id="section-6.2-10">grouping topology-ref {
+    description
+      "Reference to a termination point in an RFC 8345 topology view.
+       The identifiers are strings because the referenced topology
+       data may be outside the mounted schema.";<a href="#section-6.2-10" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.2-11">
+<pre>
+leaf network-ref {
+  type string;
+  mandatory true;
+  description "RFC 8345 network-id.";
+}
+leaf node-ref {
+  type string;
+  mandatory true;
+  description "node-id within network-ref.";
+}
+leaf tp-ref {
+  type string;
+  mandatory true;
+  description "tp-id within node-ref.";
+}   }
+</pre><a href="#section-6.2-11" class="pilcrow">¶</a>
+</div>
+<p id="section-6.2-12">grouping inventory-ref {
+    description
+      "Identifies the inventory port component associated with this
+       interface, within the network element identified by the
+       enclosing device's ne-ref. The identifier is a string because
+       IVY inventory data may be outside the mounted schema.";<a href="#section-6.2-12" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.2-13">
+<pre>
+leaf port-ref {
+  type string;
+  description
+    "IVY component-id of the physical port, when known, scoped
+     to the network element identified by the enclosing device's
+     ne-ref. This leaf identifies a directly associated physical
+     port. A link aggregation interface has no port-ref; its
+     physical ports can be identified by following its
+     lower-layer-if entries to member interfaces and reading
+     their port-ref values, when the server reports those
+     relationships and correlations. This string does not enforce
+     the existence of the referenced inventory component.";
+}   }
+</pre><a href="#section-6.2-13" class="pilcrow">¶</a>
+</div>
+<p id="section-6.2-14">augment "/if:interfaces/if:interface" {
+    description
+      "Adds read-only inventory/topology correlations and commonly
+       needed interface attributes to the mounted RFC 8343 interface
+       list. IP addressing and per-family MTU are represented using
+       RFC 8344 (ietf-ip) when that module is included in the mounted
+       schema set. The base ietf-interfaces module remains unchanged.";<a href="#section-6.2-14" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.2-15">
+<pre>
+container inventory-ref {
+  config false;
+  description
+    "Correlation to a physical port component, if one is known.";
+  uses inventory-ref;
+}
+
+list topology-ref {
+  config false;
+  key "network-ref node-ref tp-ref";
+  description
+    "Zero or more topology termination points corresponding to
+     this interface. Interfaces may exist without participating in
+     any topology view; in that case, this list is not present.
+     An interface represented in multiple topology layers has one
+     entry per layer/view.";
+  uses topology-ref;
+}
+
+leaf vlan-id {
+  config false;
+  type uint16 { range "1..4094"; }
+  description
+    "Outer VLAN identifier (VLAN tag value) when applicable. This is
+     a convenience attribute: RFC 8343 can represent VLAN
+     subinterfaces, but does not define a standard leaf for the VLAN
+     tag value itself; implementations typically derive it from L2
+     configuration and/or topology attributes. When the interface is
+     not VLAN-tagged (for example, a physical parent interface), this
+     leaf is not present.";
+  reference
+    "RFC 8944; openconfig-vlan single-tagged vlan-id";
+}
+leaf controller-annotation {
+  config false;
+  type string;
+  description
+    "Optional controller-provided annotation for the interface.";
+}   } } ```
+</pre><a href="#section-6.2-15" class="pilcrow">¶</a>
+</div>
+<p id="section-6.2-16">&lt;CODE ENDS&gt;<a href="#section-6.2-16" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="restconf-operations">
+<section id="section-7">
+      <h2 id="name-restconf-operations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-restconf-operations" class="section-name selfRef">RESTCONF Operations</a>
+      </h2>
+<p id="section-7-1">These examples use the RESTCONF URI form defined by RFC 8040 for a resource beneath a schema-mount point. They assume the parent and mounted schemas described in Section 6 are advertised by the server through schema-mount/YANG Library data. Implementations that do not expose RESTCONF may provide equivalent data through another API.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<div id="retrieve-all-interfaces-on-a-device">
+<section id="section-7.1">
+        <h3 id="name-retrieve-all-interfaces-on-">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-retrieve-all-interfaces-on-" class="section-name selfRef">Retrieve All Interfaces on a Device</a>
+        </h3>
+<p id="section-7.1-1">A client retrieves every interface on a device with a single GET against the mounted interfaces container. URI path key values MUST be percent-encoded when they contain reserved characters:<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2"><code>http
+   GET /restconf/data/inventory-network-interfaces:\
+       network-interface-inventory/device=RouterB.subdomain1.region3.isp.example.net/\
+       ietf-interfaces:interfaces
+</code><a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<p id="section-7.1-3">The response representation is the mounted "ietf-interfaces:interfaces" subtree plus augmentation data. The requested device key supplies the network-element context for any "inventory-ref/port-ref" in that subtree.
+Appendix A.2 shows a shortened full parent data-tree fixture for context; it is not the literal body of this subtree GET.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="retrieve-a-single-interface">
+<section id="section-7.2">
+        <h3 id="name-retrieve-a-single-interface">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-retrieve-a-single-interface" class="section-name selfRef">Retrieve a Single Interface</a>
+        </h3>
+<p id="section-7.2-1"><code>http
+   GET /restconf/data/inventory-network-interfaces:\
+       network-interface-inventory/device=RouterB.subdomain1.region3.isp.example.net/\
+       ietf-interfaces:interfaces/\
+       interface=Bundle-Ether10
+</code><a href="#section-7.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="filtering-by-interface-type">
+<section id="section-7.3">
+        <h3 id="name-filtering-by-interface-type">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-filtering-by-interface-type" class="section-name selfRef">Filtering by Interface Type</a>
+        </h3>
+<p id="section-7.3-1">RESTCONF does not define generic server-side predicate filtering on list entries. The base operation in this document returns the interface list; RFC 8040 "fields" and "depth" may be used for payload selection. A future revision MAY specify a YANG action or another explicit filter contract for high-interface-count devices; no such action or filter is defined by this revision.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="protocol-buffers-encoding-for-streaming-clients">
+<section id="section-7.4">
+        <h3 id="name-protocol-buffers-encoding-f">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-protocol-buffers-encoding-f" class="section-name selfRef">Protocol Buffers Encoding for Streaming Clients</a>
+        </h3>
+<p id="section-7.4-1">RESTCONF/JSON (RFC 7951) is the canonical encoding for this document's data model, but some clients -- in particular gRPC- based telemetry and streaming consumers -- prefer a typed binary wire format. A non-normative Protocol Buffers (proto3) schema, "inventory-network-interfaces-02.proto", is published alongside this document.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.4-2">Relationship to gNMI.  gNMI (gRPC Network Management Interface, gRPC-based model-agnostic subscribe/get for YANG-modeled data) is an established streaming option for this data model [GNMI]. Clients may subscribe to the mounted ietf-interfaces subtree with gNMI; the service-specific proto is an alternative for clients that want strongly typed messages without gNMI's generic "TypedValue" and path-oriented API. It is optional and does not replace gNMI or the RESTCONF operations in Sections 7.1-7.3.<a href="#section-7.4-2" class="pilcrow">¶</a></p>
+<p id="section-7.4-3">The proto schema defines:<a href="#section-7.4-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.4-4.1">
+            <p id="section-7.4-4.1.1">"Interface", "Device", and "DeviceInterfaces" messages that represent data from both YANG modules in Section 6. The proto uses snake_case names and includes helper fields such as "type_name" for IANA values outside its finite enum; the proto comments document the mapping;<a href="#section-7.4-4.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-7.4-4.2">
+            <p id="section-7.4-4.2.1">enum types for "InterfaceType", "AdminStatus", "OperStatus", "DuplexMode", "Direction", "ServiceState", and "EventType" corresponding to this module's YANG enumerations;<a href="#section-7.4-4.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-7.4-4.3">
+            <p id="section-7.4-4.3.1">a unary "DeviceInterfaceInventory.GetDeviceInterfaces" RPC, equivalent to the RESTCONF GET in Section 7.1;<a href="#section-7.4-4.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-7.4-4.4">
+            <p id="section-7.4-4.4.1">a paginated "ListDeviceInterfaces" RPC that returns "ListDeviceInterfacesResponse" with "device" entries plus a "next_page_token", for clients iterating over a very large
+fleet; and<a href="#section-7.4-4.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-7.4-4.5">
+            <p id="section-7.4-4.5.1">a server-streaming "StreamDeviceInterfaceEvents" RPC that pushes a "DeviceInterfaceEvent" (create / update / delete / initial snapshot, with a timestamp and optional "changed_fields") per interface event. For DELETE, "interface" carries the last-known pre-delete snapshot; initial synchronization uses the distinct SNAPSHOT event type.<a href="#section-7.4-4.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-7.4-5">The protobuf schema is informative. Its field naming and helper enum fields are not a normative wire encoding of YANG; the YANG modules in Section 6 are authoritative if the representations differ. Any companion protobuf schema needs to be updated to reflect the removal of the per-interface inventory "ne-ref".<a href="#section-7.4-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-8">
+      <h2 id="name-security-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-8-1">The parent device list exposes device identifiers and interface
+inventory relationships. Implementations MUST apply authorization
+to both the parent device list and every mounted interface schema.
+Access control on a parent data node does not by itself establish
+the same policy for mounted data. Servers MUST configure and test
+access control for mounted instances in accordance with RFC 8528
+and the Network Configuration Access Control Model (NACM, RFC 8341).<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">The YANG augmentation modules defined here are operational/read-only
+(their added nodes are config false). The mounted ietf-interfaces
+schema itself contains both configuration and operational-state
+nodes; this document does not claim that the whole mounted schema
+is config false. A GET-only facade MUST reject write methods unless
+a separate write contract and authorization policy are specified.<a href="#section-8-2" class="pilcrow">¶</a></p>
+<p id="section-8-3">Interface identifiers, topology relationships, and device inventory
+can be sensitive network information. Implementations SHOULD limit
+access by user, tenant, and device scope, protect RESTCONF/API
+transport with TLS, and apply equivalent authorization to streamed
+events and unary reads.<a href="#section-8-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-9">
+      <h2 id="name-iana-considerations">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-9-1">This document has no IANA actions. The "urn:example" namespaces
+and "example-" module names are placeholders for this individual
+draft. If the work is adopted by an IETF working group, final
+namespaces and module names will be selected and appropriate
+registrations requested in a later revision.<a href="#section-9-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="references">
+<section id="section-10">
+      <h2 id="name-references">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="normative-references">
+<section id="section-10.1">
+        <h3 id="name-normative-references">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<p id="section-10.1-1">[RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+Requirement Levels", BCP 14, RFC 2119, March 1997.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<p id="section-10.1-2">[RFC6991]  Schoenwaelder, J., Ed., "Common YANG Data Types",
+RFC 6991, July 2013.<a href="#section-10.1-2" class="pilcrow">¶</a></p>
+<p id="section-10.1-3">[RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling
+Language", RFC 7950, August 2016.<a href="#section-10.1-3" class="pilcrow">¶</a></p>
+<p id="section-10.1-4">[RFC7951]  Lhotka, L., "JSON Encoding of Data Modeled with YANG",
+RFC 7951, August 2016.<a href="#section-10.1-4" class="pilcrow">¶</a></p>
+<p id="section-10.1-5">[RFC8040]  Bierman, A., Bjorklund, M., and K. Watsen, "RESTCONF
+Protocol", RFC 8040, January 2017.<a href="#section-10.1-5" class="pilcrow">¶</a></p>
+<p id="section-10.1-6">[RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+2119 Key Words", BCP 14, RFC 8174, May 2017.<a href="#section-10.1-6" class="pilcrow">¶</a></p>
+<p id="section-10.1-7">[RFC8340]  Bjorklund, M. and L. Berger, Ed., "YANG Tree
+Diagrams", BCP 215, RFC 8340, March 2018.<a href="#section-10.1-7" class="pilcrow">¶</a></p>
+<p id="section-10.1-8">[RFC8341]  Bierman, A. and M. Bjorklund, "Network Configuration
+Access Control Model", STD 91, RFC 8341, March 2018.<a href="#section-10.1-8" class="pilcrow">¶</a></p>
+<p id="section-10.1-9">[RFC8343]  Bjorklund, M., "A YANG Data Model for Interface
+Management", RFC 8343, March 2018.<a href="#section-10.1-9" class="pilcrow">¶</a></p>
+<p id="section-10.1-10">[RFC8345]  Clemm, A., Medved, J., Varga, R., Bahadur, N.,
+Ananthakrishnan, H., and X. Liu, "A YANG Data Model
+for Network Topologies", RFC 8345, March 2018.<a href="#section-10.1-10" class="pilcrow">¶</a></p>
+<p id="section-10.1-11">[RFC8407]  Bierman, A., "Guidelines for Authors and Reviewers of
+Documents Containing YANG Data Models", BCP 216,
+RFC 8407, October 2018.<a href="#section-10.1-11" class="pilcrow">¶</a></p>
+<p id="section-10.1-12">[RFC8525]  Bierman, A., Bjorklund, M., and K. Watsen, "YANG
+Library", RFC 8525, March 2019.<a href="#section-10.1-12" class="pilcrow">¶</a></p>
+<p id="section-10.1-13">[RFC8528]  Bjorklund, M. and L. Lhotka, "YANG Schema Mount",
+RFC 8528, March 2019.<a href="#section-10.1-13" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="informative-references">
+<section id="section-10.2">
+        <h3 id="name-informative-references">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<p id="section-10.2-1">[RFC8346]  Clemm, A., Medved, J., Varga, R., Liu, X.,
+Ananthakrishnan, H., and N. Bahadur, "A YANG Data
+Model for Layer 3 Topologies", RFC 8346, March 2018.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<p id="section-10.2-2">[RFC8944]  Dong, J., Wei, X., Wu, Q., Boucadair, M., and A.
+Liu, "A YANG Data Model for Layer 2 Network
+Topologies", RFC 8944, November 2020.<a href="#section-10.2-2" class="pilcrow">¶</a></p>
+<p id="section-10.2-3">[IVY-INVENTORY]
+"A YANG Data Model for Network and Network Element
+Inventory", draft-ietf-ivy-network-inventory-yang-19
+(work in progress).<a href="#section-10.2-3" class="pilcrow">¶</a></p>
+<p id="section-10.2-4">[IVY-TOPOLOGY]
+"A YANG Data Model for Network Inventory Topology",
+draft-ietf-ivy-network-inventory-topology-11 (work in
+progress).<a href="#section-10.2-4" class="pilcrow">¶</a></p>
+<p id="section-10.2-5">[OC-INTERFACES]
+OpenConfig Working Group, "openconfig-interfaces.yang",
+OpenConfig public models repository
+(github.com/openconfig/public), 'mtu' leaf.<a href="#section-10.2-5" class="pilcrow">¶</a></p>
+<p id="section-10.2-6">[OC-ETHERNET]
+OpenConfig Working Group, "openconfig-if-ethernet.yang",
+OpenConfig public models repository, 'auto-negotiate' leaves.<a href="#section-10.2-6" class="pilcrow">¶</a></p>
+<p id="section-10.2-7">[OC-AGGREGATE]
+OpenConfig Working Group, "openconfig-if-aggregate.yang",
+OpenConfig public models repository,
+'aggregation/state/member' and 'ethernet/config/
+aggregate-id' leaves.<a href="#section-10.2-7" class="pilcrow">¶</a></p>
+<p id="section-10.2-8">[OC-VLAN]  OpenConfig Working Group, "openconfig-vlan.yang",
+OpenConfig public models repository,
+'vlan/match/single-tagged/config/vlan-id' leaf.<a href="#section-10.2-8" class="pilcrow">¶</a></p>
+<p id="section-10.2-9">[OC-IF-IP] OpenConfig Working Group, "openconfig-if-ip.yang",
+OpenConfig public models repository,
+'ipv4/addresses/address/config/ip' leaf.<a href="#section-10.2-9" class="pilcrow">¶</a></p>
+<p id="section-10.2-10">[OC-TERMINAL-DEVICE]
+OpenConfig Working Group, "openconfig-terminal-device.
+yang", OpenConfig public models repository,
+'logical-channels/channel/config/{rate-class,
+trib-protocol}' leaves.<a href="#section-10.2-10" class="pilcrow">¶</a></p>
+<p id="section-10.2-11">[OC-PLATFORM-PORT]
+OpenConfig Working Group, "openconfig-platform-port.
+yang", OpenConfig public models repository,
+'hardware-port' leaf.<a href="#section-10.2-11" class="pilcrow">¶</a></p>
+<p id="section-10.2-12">[GNMI]     OpenConfig Working Group, "gRPC Network Management
+Interface (gNMI) Specification", OpenConfig public
+reference repository, gNMI specification.<a href="#section-10.2-12" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="full-worked-example-mobilecoreregion3">
+<section id="appendix-A">
+      <h2 id="name-full-worked-example-mobilec">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-full-worked-example-mobilec" class="section-name selfRef">Full Worked Example (mobilecore.region3)</a>
+      </h2>
+<p id="appendix-A-1">This appendix uses a synthetic three-router network to show how the
+proposed model brings together interface data, physical inventory, and
+topology references. It first describes the network and the behavior
+the example is intended to illustrate. It then shows the corresponding
+mounted interface inventory and the correlations exposed by the model.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">The complete source data used in this appendix -- three routers, their
+IVY network-inventory, IVY inventory-topology, RFC 8944 [RFC8944] L2
+topology, and RFC 8346 [RFC8346]-style L3 topology -- plus the full
+parent data-tree fixture from which the Section 7.1 mounted-subtree
+response is derived -- are published as a companion file set:<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-3.1">
+          <p id="appendix-A-3.1.1">examples/mobilecore-region3/01-ivy-network-inventory.json<a href="#appendix-A-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.2">
+          <p id="appendix-A-3.2.1">examples/mobilecore-region3/02-ivy-inventory-topology.json<a href="#appendix-A-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.3">
+          <p id="appendix-A-3.3.1">examples/mobilecore-region3/03-l2-topology.json<a href="#appendix-A-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.4">
+          <p id="appendix-A-3.4.1">examples/mobilecore-region3/04-l3-topology.json<a href="#appendix-A-3.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.5">
+          <p id="appendix-A-3.5.1">examples/mobilecore-region3/05-network-interface-schema-mount-v4.json<a href="#appendix-A-3.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.6">
+          <p id="appendix-A-3.6.1">inventory-network-interfaces@2026-11-25.yang (parent module)<a href="#appendix-A-3.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.7">
+          <p id="appendix-A-3.7.1">device-interface-attributes@2026-11-25.yang (mounted module)<a href="#appendix-A-3.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.8">
+          <p id="appendix-A-3.8.1">inventory-network-interfaces.proto (Section 7.4)<a href="#appendix-A-3.8.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-A-4">The YANG modules, protobuf schema, source topology payloads, and worked JSON fixture are included in this repository.  The JSON fixture is a synthetic example; interface state/MAC/ifIndex values not present in the source topology payloads are illustrative, not live-device observations.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<div id="example-network-and-illustrative-goals">
+<section id="appendix-A.1">
+        <h3 id="name-example-network-and-illustr">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-example-network-and-illustr" class="section-name selfRef">Example Network and Illustrative Goals</a>
+        </h3>
+<p id="appendix-A.1-1">The topology payloads describe the following three-router connectivity.
+RouterA, RouterB, and RouterC are shorthand for the corresponding
+*.subdomain1.region3.bt.uk node identifiers in the fixture.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.1-2">
+<pre>
+                        RouterA
+                       /       \
+                      /         \
+   VLAN 100/200/300  /           \ 100G physical link
+   TenGigE0/2/0/0   /             \ HundredGigE0/2/0/0
+                   /               \
+              RouterB =============== RouterC
+                      Bundle-Ether10
+                        (LAG)
+            Members at each end: TenGigE0/1/0/0 and
+                                 TenGigE0/1/0/1
+</pre><a href="#appendix-A.1-2" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A.1-3">RouterB inventory-only ports: TenGigE0/2/0/1 and HundredGigE0/2/0/1 (no topology TP/link).<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-4">The RouterA-to-RouterB connection has VLAN subinterfaces 100, 200, and 300 over the physical TenGigE port.  RouterB and RouterC connect through the Bundle-Ether10 LAG; the two member links are shown below it. RouterA and RouterC have a direct HundredGigE link.<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-5">The example is intended to illustrate three client tasks:<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-6.1">
+            <p id="appendix-A.1-6.1.1">navigating from a topology connection to the device interfaces that
+realize it, including the members of a LAG;<a href="#appendix-A.1-6.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-6.2">
+            <p id="appendix-A.1-6.2.1">following interface-layering relationships between a physical
+interface and its VLAN subinterfaces; and<a href="#appendix-A.1-6.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-6.3">
+            <p id="appendix-A.1-6.3.1">distinguishing a known inventory port from a topology termination
+point, as demonstrated by RouterB's inventory-only ports.<a href="#appendix-A.1-6.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="appendix-A.1-7">These relationships can be represented without requiring a client to
+reconstruct them by joining unrelated datasets. The mounted interface
+tree provides the per-device interface state and layering, while the
+augmentation supplies the inventory and topology correlations.<a href="#appendix-A.1-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-8">RouterB's interfaces are represented as follows in the source inventory and topology data:<a href="#appendix-A.1-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-9.1">
+            <p id="appendix-A.1-9.1.1">TenGigE0/2/0/0: physical interface in the physical and L2 views.<a href="#appendix-A.1-9.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-9.2">
+            <p id="appendix-A.1-9.2.1">TenGigE0/2/0/0.100 through .300: VLAN subinterfaces in L2 and L3.<a href="#appendix-A.1-9.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-9.3">
+            <p id="appendix-A.1-9.3.1">TenGigE0/1/0/0 and TenGigE0/1/0/1: physical LAG members.<a href="#appendix-A.1-9.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-9.4">
+            <p id="appendix-A.1-9.4.1">Bundle-Ether10: LAG represented in L2 and L3.<a href="#appendix-A.1-9.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-9.5">
+            <p id="appendix-A.1-9.5.1">TenGigE0/2/0/1 and HundredGigE0/2/0/1: inventory-only ports.<a href="#appendix-A.1-9.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="interface-inventory-representation">
+<section id="appendix-A.2">
+        <h3 id="name-interface-inventory-represe">
+<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-interface-inventory-represe" class="section-name selfRef">Interface Inventory Representation</a>
+        </h3>
+<p id="appendix-A.2-1">The proposed model covers RouterB's interface inventory through one
+device entry keyed by its network-element reference. Under that entry,
+the mounted "ietf-interfaces:interfaces" subtree carries the standard
+interface identity, type, state, speed, IP addressing, MTU, and
+layering relationships. The mounted augmentation adds:<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.2-2.1">
+            <p id="appendix-A.2-2.1.1">"inventory-ref" when an interface can be associated with a physical
+inventory port;<a href="#appendix-A.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.2-2.2">
+            <p id="appendix-A.2-2.2.1">"topology-ref" when the interface is represented by one or more
+topology termination points; and<a href="#appendix-A.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.2-2.3">
+            <p id="appendix-A.2-2.3.1">"vlan-id" and "controller-annotation" for the additional interface
+information defined by this proposal.<a href="#appendix-A.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="appendix-A.2-3">The following shortened RFC 7951 [RFC7951] example shows the full
+parent data-tree shape using the worked example in this appendix. It
+is a fixture, not the literal body of the subtree GET in Section
+7.1; that GET returns the inner "ietf-interfaces:interfaces"
+resource representation. The complete three-router fixture is
+identified as "05-network-interfaces-schema-mount-v4.json"; that
+companion fixture needs to be updated to match this revision.<a href="#appendix-A.2-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-4">The topology relationships and documented-prefix IP addresses come
+from the synthetic source payloads. The if-index, MAC address, and
+admin/oper states are illustrative placeholders, not measurements
+from a live device.
+In the RFC 7951 encoding below, phys-address is base64 because
+ietf-interfaces defines it using the YANG binary type.<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-5"><code>json
+   {
+  "inventory-network-interfaces:network-interface-inventory": {
+    "device": [
+      {
+        "ne-ref": "RouterB.subdomain1.region3.isp.example.net",
+        "ietf-interfaces:interfaces": {
+          "interface": [
+            {
+              "name": "TenGigE0/1/0/0",
+              "type": "iana-if-type:ethernetCsmacd",
+              "admin-status": "up",
+              "oper-status": "up",
+              "if-index": 10,
+              "phys-address": "qrvMCwEA",
+              "speed": "10000000000",
+              "higher-layer-if": [
+                "Bundle-Ether10"
+              ],
+              "lower-layer-if": [],
+              "device-interface-attributes:inventory-ref": {
+                "port-ref": "TenGigE0/1/0/0"
+              },
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/1/0/0"
+                }
+              ]
+            },
+            {
+              "name": "TenGigE0/1/0/1",
+              "type": "iana-if-type:ethernetCsmacd",
+              "admin-status": "up",
+              "oper-status": "up",
+              "higher-layer-if": [
+                "Bundle-Ether10"
+              ],
+              "lower-layer-if": [],
+            },
+            {
+              "name": "Bundle-Ether10",
+              "type": "iana-if-type:ieee8023adLag",
+              "admin-status": "up",
+              "oper-status": "up",
+              "higher-layer-if": [],
+              "lower-layer-if": [
+                "TenGigE0/1/0/0",
+                "TenGigE0/1/0/1"
+              ],
+              "ietf-ip:ipv4": {
+                "mtu": 9216,
+                "address": [
+                  {
+                    "ip": "198.51.100.0",
+                    "prefix-length": 32
+                  }
+                ]
+              }
+            },
+            {
+              "name": "TenGigE0/2/0/0",
+              "type": "iana-if-type:ethernetCsmacd",
+              "admin-status": "up",
+              "oper-status": "up",
+              "higher-layer-if": [
+                "TenGigE0/2/0/0.100",
+                "TenGigE0/2/0/0.200",
+                "TenGigE0/2/0/0.300"
+              ],
+              "lower-layer-if": []
+            },
+            {
+              "name": "TenGigE0/2/0/0.100",
+              "type": "iana-if-type:l2vlan",
+              "admin-status": "up",
+              "oper-status": "up",
+              "higher-layer-if": [],
+              "lower-layer-if": [
+                "TenGigE0/2/0/0"
+              ],
+              "device-interface-attributes:vlan-id": 100,
+              "ietf-ip:ipv4": {
+                "mtu": 1500,
+                "address": [
+                  {
+                    "ip": "192.0.2.1",
+                    "prefix-length": 24
+                  }
+                ]
+              }
+            },
+            {
+              "name": "TenGigE0/2/0/1",
+              "type": "iana-if-type:ethernetCsmacd",
+              "admin-status": "down",
+              "oper-status": "down",
+              "higher-layer-if": [],
+              "lower-layer-if": [],
+              "device-interface-attributes:inventory-ref": {
+                "port-ref": "TenGigE0/2/0/1"
+              },
+              "device-interface-attributes:controller-annotation": "Inventory-only physical port; no topology termination point or link"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+</code><a href="#appendix-A.2-5" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-6">Note how "higher-layer-if"/"lower-layer-if" give the LAG&lt;-&gt;member
+and VLAN&lt;-&gt;parent relationships directly, in both directions, with
+no topology-network traversal required; "inventory-ref" and
+"topology-ref" remain available for clients that still need to
+correlate back into inventory or topology views. Interface capacity,
+IP addressing, and per-family MTU come from the mounted base modules;
+they are not duplicated by the augmentation. "controller-annotation"
+allows a controller to attach an optional free-form note to an
+interface.<a href="#appendix-A.2-6" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-7">The "TenGigE0/2/0/1" entry illustrates that an interface may have
+no "topology-ref" entries while "inventory-ref" remains
+populated with the known chassis-port component.<a href="#appendix-A.2-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="comparison-against-commonly-implemented-interface-attributes">
+<section id="appendix-B">
+      <h2 id="name-comparison-against-commonly">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-comparison-against-commonly" class="section-name selfRef">Comparison Against Commonly Implemented Interface Attributes</a>
+      </h2>
+<p id="appendix-B-1">The attributes in this document were compared against the kind of
+attribute set commonly exposed by
+deployed, SNMP-IF-MIB-derived interface-inventory implementations
+(vendor-neutral by construction; no specific product or API is
+referenced). Table 2 summarizes the comparison; attributes already
+covered by RFC 8343 or by this document's augmentation are marked
+"covered", attributes this document now adds as a result of the
+comparison are marked "added (Section 6)", and attributes judged
+out of scope for this revision are marked "deferred" with a
+one-line reason.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2"><code>text
++==========================+====================+==================+
+| Commonly implemented      | Disposition        | Notes            |
+| interface attribute       |                     |                  |
++==========================+====================+==================+
+| port/interface name        | covered            | if:name          |
+|   (various forms)          |                    |                  |
+| description                | covered            | if:description   |
+| interface type              | covered           | if:type          |
+| admin status,                | covered         | if:admin-status, |
+|   operational status          |                 | if:oper-status   |
+| interface index              | covered           | if:if-index      |
+| MAC / physical address       | covered           | if:phys-address  |
+| interface speed               | covered          | if:speed         |
+| link up/down trap enable      | covered          | if:link-up-down- |
+|                               |                   |  trap-enable    |
+| maximum transmission unit      | covered          | ietf-ip:ipv4/mtu,|
+|   (MTU)                        |                  | ietf-ip:ipv6/mtu |
+|                                |                  | (RFC 8344)       |
+|   state                         |               |                 |
+| separate port, connector, and    | deferred     | distinct        |
+|   equipment identifiers          |              | connector-vs-   |
+|                                   |              | port identity   |
+|                                   |              | not modeled;    |
+|                                   |              | 'inventory-ref. |
+|                                   |              | port-ref' is an |
+|                                   |              | approximation   |
+| physical connector presence       | deferred    | optics-presence |
+|   flag                            |             | not modeled     |
+| promiscuous-mode flag, SPAN/      | deferred     | niche/internal; |
+|   RSPAN monitoring flag,          |              |  no operator-   |
+|   internal location index,        |             |  facing need    |
+|   soak timers, supported MTU      |              |  identified yet |
+|   range, shared risk resource     |              |                 |
+|   group id, entity alias          |              |                 |
+|   mapping identifier, LAG end     |              |                 |
+|   identifier, alias name          |              |                 |
++==========================+====================+==================+
+</code><a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<p id="appendix-B-3">Table 2: Commonly implemented attribute comparison<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+<p id="appendix-B-4">The "added" row items are incorporated directly into the YANG
+module in Section 6 and the tree diagram in Section 5.2; the
+"deferred" items are recorded here so a future revision does not
+have to repeat this comparison from scratch.<a href="#appendix-B-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="openconfig-comparisons">
+<section id="appendix-C">
+      <h2 id="name-openconfig-comparisons">
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-openconfig-comparisons" class="section-name selfRef">OpenConfig Comparisons</a>
+      </h2>
+<div id="interface-layering">
+<section id="appendix-C.1">
+        <h3 id="name-interface-layering">
+<a href="#appendix-C.1" class="section-number selfRef">C.1. </a><a href="#name-interface-layering" class="section-name selfRef">Interface Layering</a>
+        </h3>
+<p id="appendix-C.1-1">The bidirectional LAG/VLAN stacking design in Section 5.1 is
+validated by real-world experience in OpenConfig: when
+openconfig-interfaces alone proved insufficient for LAG
+membership queries, openconfig-if-aggregate added both directions
+of the same relationship RFC 8343 Section 3.3 provides
+generically -- an aggregate interface's "aggregation/state/
+member" leaf-list points down at its member interfaces, and each
+member's "ethernet/config/aggregate-id" leaf points back up at
+its aggregate -- for the specific case of LAGs. That OpenConfig
+had to add this reverse pointer explicitly, after the fact and
+for one interface type, is strong practical evidence that a
+generic bidirectional stacking mechanism is required at the
+interface-model layer. This document relies on the RFC 8343
+generic mechanism instead of a LAG-specific one so that the same
+"higher-layer-if"/"lower-layer-if" pair also covers VLAN
+sub-interfaces and other interface-type stacking without a
+separate leaf per interface type.<a href="#appendix-C.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="attribute-comparisons">
+<section id="appendix-C.2">
+        <h3 id="name-attribute-comparisons">
+<a href="#appendix-C.2" class="section-number selfRef">C.2. </a><a href="#name-attribute-comparisons" class="section-name selfRef">Attribute Comparisons</a>
+        </h3>
+<p id="appendix-C.2-1">The following comparisons identify related OpenConfig leaves and
+cases for which no direct counterpart was identified:<a href="#appendix-C.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-C.2-2.1">
+            <p id="appendix-C.2-2.1.1">"inventory-ref/port-ref": openconfig-platform-port's
+"hardware-port" leaf provides a similar per-device binding.<a href="#appendix-C.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.2-2.2">
+            <p id="appendix-C.2-2.2.1">"topology-ref": no stored interface-level topology reference was
+identified.<a href="#appendix-C.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.2-2.3">
+            <p id="appendix-C.2-2.3.1">"vlan-id": openconfig-vlan defines
+"/interfaces/interface/subinterfaces/subinterface/vlan/match/
+single-tagged/config/vlan-id", with the same range (1-4094).<a href="#appendix-C.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.2-2.4">
+            <p id="appendix-C.2-2.4.1">IP addressing and per-family MTU are represented using RFC 8344
+(ietf-ip) rather than as additional augmentation leaves. OpenConfig
+models interface IP configuration under openconfig-if-ip, and models
+interface MTU under openconfig-interfaces.<a href="#appendix-C.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.2-2.5">
+            <p id="appendix-C.2-2.5.1">"controller-annotation": no counterpart was identified for this unstructured field.<a href="#appendix-C.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-D">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Ramkrishna Galla</span></div>
+<div dir="auto" class="left"><span class="org">Cisco Systems, Inc.</span></div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Muthumayan Madhayyan</span></div>
+<div dir="auto" class="left"><span class="org">Cisco Systems, Inc.</span></div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
