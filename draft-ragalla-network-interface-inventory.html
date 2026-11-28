@@ -1228,10 +1228,10 @@ relationships, with correlations to network inventory and topology data.<a href=
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
-            <p id="section-toc.1-1.11.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-full-worked-example-mobilec" class="internal xref">Full Worked Example (mobilecore.region3)</a></p>
+            <p id="section-toc.1-1.11.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-illustrative-example" class="internal xref">Illustrative Example</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1">
-                <p id="section-toc.1-1.11.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-example-network-and-illustr" class="internal xref">Example Network and Illustrative Goals</a></p>
+                <p id="section-toc.1-1.11.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-sample-network" class="internal xref">Sample Network</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
                 <p id="section-toc.1-1.11.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-interface-inventory-represe" class="internal xref">Interface Inventory Representation</a></p>
@@ -1239,18 +1239,10 @@ relationships, with correlations to network inventory and topology data.<a href=
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
-            <p id="section-toc.1-1.12.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-comparison-against-commonly" class="internal xref">Comparison Against Commonly Implemented Interface Attributes</a></p>
+            <p id="section-toc.1-1.12.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-northbound-interface-attrib" class="internal xref">Northbound Interface Attribute Coverage</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-openconfig-comparisons" class="internal xref">OpenConfig Comparisons</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
-                <p id="section-toc.1-1.13.2.1.1"><a href="#appendix-C.1" class="auto internal xref">C.1</a>.  <a href="#name-interface-layering" class="internal xref">Interface Layering</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
-                <p id="section-toc.1-1.13.2.2.1"><a href="#appendix-C.2" class="auto internal xref">C.2</a>.  <a href="#name-attribute-comparisons" class="internal xref">Attribute Comparisons</a></p>
-</li>
-            </ul>
+            <p id="section-toc.1-1.13.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-openconfig-interoperability" class="internal xref">OpenConfig Interoperability</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
             <p id="section-toc.1-1.14.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
@@ -1508,25 +1500,8 @@ module inventory-network-interfaces {
 
   revision 2026-11-24 {
     description
-      "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
-       leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
-       and per-family MTU within the mounted schema set, and relies on
-       RFC 8343 if:speed for interface capacity.";
+      "Initial version of the network-wide interface inventory model.";
     reference "draft-ragalla-network-interface-inventory";
-  }
-
-  revision 2026-10-29 {
-    description
-      "-03 revision. Parent mount wrapper is unchanged; the mounted
-       augmentation no longer includes alarm attributes.";
-    reference "draft-ragalla-device-interface-inventory-03";
-  }
-
-  revision 2026-10-13 {
-    description
-      "Initial -02 parent/child split. The parent device mount wrapper
-       is separate from the mounted interface augmentation.";
-    reference "draft-ragalla-device-interface-inventory-02";
   }
 
   container network-interface-inventory {
@@ -1599,28 +1574,8 @@ module device-interface-attributes {
 
   revision 2026-11-24 {
     description
-      "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
-       leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
-       and per-family MTU within the mounted schema set, and relies on
-       RFC 8343 if:speed for interface capacity.";
+      "Initial version of the device interface attributes augmentation.";
     reference "draft-ragalla-network-interface-inventory";
-  }
-
-  revision 2026-10-29 {
-    description
-      "-03 revision. Removes current-alarm-severity and alarm-ref from
-       the mounted interface augmentation. All remaining augmentation
-       data is operational/read-only; cross-mount correlations use
-       string identifiers to respect the RFC 8528 mount-jail boundary.";
-    reference "draft-ragalla-device-interface-inventory-03";
-  }
-
-  revision 2026-10-13 {
-    description
-      "Initial -02 mounted-interface augmentation. All augmentation
-       data is operational/read-only. Cross-mount correlations use
-       string identifiers to respect the RFC 8528 mount-jail boundary.";
-    reference "draft-ragalla-device-interface-inventory-02";
   }
 
   grouping topology-ref {
@@ -1967,99 +1922,57 @@ registrations requested in a later revision.<a href="#section-9-1" class="pilcro
 </div>
 </section>
 </div>
-<div id="full-worked-example-mobilecoreregion3">
+<div id="illustrative-example">
 <section id="appendix-A">
-      <h2 id="name-full-worked-example-mobilec">
-<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-full-worked-example-mobilec" class="section-name selfRef">Full Worked Example (mobilecore.region3)</a>
+      <h2 id="name-illustrative-example">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-illustrative-example" class="section-name selfRef">Illustrative Example</a>
       </h2>
-<p id="appendix-A-1">This appendix uses a synthetic three-router network to show how the
-proposed model brings together interface data, physical inventory, and
-topology references. It first describes the network and the behavior
-the example is intended to illustrate. It then shows the corresponding
-mounted interface inventory and the correlations exposed by the model.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
-<p id="appendix-A-2">The complete source data used in this appendix -- three routers, their
-IVY network-inventory, IVY inventory-topology, <span>[<a href="#RFC8944" class="cite xref">RFC8944</a>]</span> L2
-topology, and <span>[<a href="#RFC8346" class="cite xref">RFC8346</a>]</span>-style L3 topology -- plus the full
-parent data-tree fixture from which the Section 7.1 mounted-subtree
-response is derived -- are published as a companion file set:<a href="#appendix-A-2" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="appendix-A-3.1">
-          <p id="appendix-A-3.1.1">examples/mobilecore-region3/01-ivy-network-inventory.json<a href="#appendix-A-3.1.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-A-3.2">
-          <p id="appendix-A-3.2.1">examples/mobilecore-region3/02-ivy-inventory-topology.json<a href="#appendix-A-3.2.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-A-3.3">
-          <p id="appendix-A-3.3.1">examples/mobilecore-region3/03-l2-topology.json<a href="#appendix-A-3.3.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-A-3.4">
-          <p id="appendix-A-3.4.1">examples/mobilecore-region3/04-l3-topology.json<a href="#appendix-A-3.4.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-A-3.5">
-          <p id="appendix-A-3.5.1">examples/mobilecore-region3/05-network-interface-schema-mount-v4.json<a href="#appendix-A-3.5.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-A-3.6">
-          <p id="appendix-A-3.6.1">inventory-network-interfaces@2026-11-25.yang (parent module)<a href="#appendix-A-3.6.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-A-3.7">
-          <p id="appendix-A-3.7.1">device-interface-attributes@2026-11-25.yang (mounted module)<a href="#appendix-A-3.7.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-A-3.8">
-          <p id="appendix-A-3.8.1">inventory-network-interfaces.proto (Section 7.4)<a href="#appendix-A-3.8.1" class="pilcrow">¶</a></p>
-</li>
-      </ul>
-<p id="appendix-A-4">The YANG modules, protobuf schema, source topology payloads, and worked JSON fixture are included in this repository.  The JSON fixture is a synthetic example; interface state/MAC/ifIndex values not present in the source topology payloads are illustrative, not live-device observations.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
-<div id="example-network-and-illustrative-goals">
+<p id="appendix-A-1">This section uses a synthetic three-router network to show how the proposed model brings together interface data, physical inventory, and topology references. It first describes the network and the behavior the example is intended to illustrate. It then shows the corresponding mounted interface inventory and the correlations exposed by the model.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<div id="sample-network">
 <section id="appendix-A.1">
-        <h3 id="name-example-network-and-illustr">
-<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-example-network-and-illustr" class="section-name selfRef">Example Network and Illustrative Goals</a>
+        <h3 id="name-sample-network">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-sample-network" class="section-name selfRef">Sample Network</a>
         </h3>
-<p id="appendix-A.1-1">The topology payloads describe the following three-router connectivity.
-RouterA, RouterB, and RouterC are shorthand for the corresponding
-*.subdomain1.region3.bt.uk node identifiers in the fixture.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-1">The topology payloads describe the following three-router connectivity.  RouterA, RouterB, and RouterC are network elements in subdomain1.region3.isp.example.net.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1-2">
 <pre>
                         RouterA
+        TenGigE0/2/0/0   /   \ HundredGigE0/2/0/0
+                        /     \
                        /       \
                       /         \
    VLAN 100/200/300  /           \ 100G physical link
-   TenGigE0/2/0/0   /             \ HundredGigE0/2/0/0
+                    /             \
                    /               \
-              RouterB =============== RouterC
-                      Bundle-Ether10
+   TenGigE0/2/0/0 /                 \ HundredGigE0/2/0/0
+            RouterB =============== RouterC
+                    Bundle-Ether10
                         (LAG)
-            Members at each end: TenGigE0/1/0/0 and
-                                 TenGigE0/1/0/1
+    Members at each end: TenGigE0/1/0/0 and TenGigE0/1/0/1
 </pre><a href="#appendix-A.1-2" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.1-3">RouterB inventory-only ports: TenGigE0/2/0/1 and HundredGigE0/2/0/1 (no topology TP/link).<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-4">The RouterA-to-RouterB connection has VLAN subinterfaces 100, 200, and 300 over the physical TenGigE port.  RouterB and RouterC connect through the Bundle-Ether10 LAG; the two member links are shown below it. RouterA and RouterC have a direct HundredGigE link.<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-3">RouterA-to-RouterB connection has VLAN subinterfaces 100, 200, and 300 over physical TenGigE port.  RouterB and RouterC connect through the Bundle-Ether10 LAG; the two member links are shown below it. RouterA and RouterC have a direct HundredGigE link.<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-4">RouterB also has ports: TenGigE0/2/0/1 and HundredGigE0/2/0/1 that do not participate in topology i.e., there is no link or termination point.<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
 <p id="appendix-A.1-5">The example is intended to illustrate three client tasks:<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A.1-6.1">
-            <p id="appendix-A.1-6.1.1">navigating from a topology connection to the device interfaces that
-realize it, including the members of a LAG;<a href="#appendix-A.1-6.1.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.1-6.1.1">navigating from a topology connection to the device interfaces that realize it, including the members of a LAG;<a href="#appendix-A.1-6.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="appendix-A.1-6.2">
-            <p id="appendix-A.1-6.2.1">following interface-layering relationships between a physical
-interface and its VLAN subinterfaces; and<a href="#appendix-A.1-6.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.1-6.2.1">following interface-layering relationships between a physical interface and its VLAN subinterfaces; and<a href="#appendix-A.1-6.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="appendix-A.1-6.3">
-            <p id="appendix-A.1-6.3.1">distinguishing a known inventory port from a topology termination
-point, as demonstrated by RouterB's inventory-only ports.<a href="#appendix-A.1-6.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.1-6.3.1">distinguishing a known inventory port from a topology termination point, as demonstrated by RouterB's inventory-only ports.<a href="#appendix-A.1-6.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="appendix-A.1-7">These relationships can be represented without requiring a client to
-reconstruct them by joining unrelated datasets. The mounted interface
-tree provides the per-device interface state and layering, while the
-augmentation supplies the inventory and topology correlations.<a href="#appendix-A.1-7" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-8">RouterB's interfaces are represented as follows in the source inventory and topology data:<a href="#appendix-A.1-8" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-7">These relationships can be represented without requiring a client to reconstruct them by joining unrelated datasets. The mounted interface tree provides the per-device interface state and layering, while the augmentation supplies the inventory and topology correlations.<a href="#appendix-A.1-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-8">RouterB is chosen as one sample router to showcase how its interfaces are represented in network interface inventory and to relate them to topology and physical inventory models. RouterB has a combination of VLAN, Bundle and physical interfaces, making it a good choice to cover the concept:<a href="#appendix-A.1-8" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A.1-9.1">
-            <p id="appendix-A.1-9.1.1">TenGigE0/2/0/0: physical interface in the physical and L2 views.<a href="#appendix-A.1-9.1.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.1-9.1.1">TenGigE0/2/0/0: physical interface in the physical inventory and L2 topology views.<a href="#appendix-A.1-9.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="appendix-A.1-9.2">
-            <p id="appendix-A.1-9.2.1">TenGigE0/2/0/0.100 through .300: VLAN subinterfaces in L2 and L3.<a href="#appendix-A.1-9.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.1-9.2.1">TenGigE0/2/0/0.100 through .300: VLAN subinterfaces in L2 and L3 topology.<a href="#appendix-A.1-9.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="appendix-A.1-9.3">
             <p id="appendix-A.1-9.3.1">TenGigE0/1/0/0 and TenGigE0/1/0/1: physical LAG members.<a href="#appendix-A.1-9.3.1" class="pilcrow">¶</a></p>
@@ -2078,38 +1991,20 @@ augmentation supplies the inventory and topology correlations.<a href="#appendix
         <h3 id="name-interface-inventory-represe">
 <a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-interface-inventory-represe" class="section-name selfRef">Interface Inventory Representation</a>
         </h3>
-<p id="appendix-A.2-1">The proposed model covers RouterB's interface inventory through one
-device entry keyed by its network-element reference. Under that entry,
-the mounted "ietf-interfaces:interfaces" subtree carries the standard
-interface identity, type, state, speed, IP addressing, MTU, and
-layering relationships. The mounted augmentation adds:<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-1">The proposed model covers RouterB's interface inventory through one device entry keyed by its network-element reference. Under that entry, the mounted "ietf-interfaces:interfaces" subtree carries the standard interface identity, type, state, speed, IP addressing, MTU, and layering relationships. The mounted augmentation adds:<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A.2-2.1">
-            <p id="appendix-A.2-2.1.1">"inventory-ref" when an interface can be associated with a physical
-inventory port;<a href="#appendix-A.2-2.1.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.2-2.1.1">"inventory-ref" when an interface can be associated with a physical inventory port;<a href="#appendix-A.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="appendix-A.2-2.2">
-            <p id="appendix-A.2-2.2.1">"topology-ref" when the interface is represented by one or more
-topology termination points; and<a href="#appendix-A.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.2-2.2.1">"topology-ref" when the interface is represented by one or more topology termination points; and<a href="#appendix-A.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="appendix-A.2-2.3">
-            <p id="appendix-A.2-2.3.1">"vlan-id" and "controller-annotation" for the additional interface
-information defined by this proposal.<a href="#appendix-A.2-2.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.2-2.3.1">"vlan-id" and "controller-annotation" for the additional interface information defined by this proposal.<a href="#appendix-A.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="appendix-A.2-3">The following shortened <span>[<a href="#RFC7951" class="cite xref">RFC7951</a>]</span> example shows the full
-parent data-tree shape using the worked example in this appendix. It
-is a fixture, not the literal body of the subtree GET in Section
-7.1; that GET returns the inner "ietf-interfaces:interfaces"
-resource representation. The complete three-router fixture is
-identified as "05-network-interfaces-schema-mount-v4.json"; that
-companion fixture needs to be updated to match this revision.<a href="#appendix-A.2-3" class="pilcrow">¶</a></p>
-<p id="appendix-A.2-4">The topology relationships and documented-prefix IP addresses come
-from the synthetic source payloads. The if-index, MAC address, and
-admin/oper states are illustrative placeholders, not measurements
-from a live device.
-In the <span>[<a href="#RFC7951" class="cite xref">RFC7951</a>]</span> encoding below, phys-address is base64 because
-ietf-interfaces defines it using the YANG binary type.<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-3">The following shortened <span>[<a href="#RFC7951" class="cite xref">RFC7951</a>]</span> example shows the full parent data-tree shape using the worked example in this appendix. It is a fixture, not the literal body of the subtree GET in Section 7.1; that GET returns the inner "ietf-interfaces:interfaces" resource representation. The complete three-router fixture is identified as "05-network-interfaces-schema-mount-v4.json"; that companion fixture needs to be updated to match this revision.<a href="#appendix-A.2-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-4">The topology relationships and documented-prefix IP addresses come from the synthetic source payloads. The if-index, MAC address, and admin/oper states are illustrative placeholders, not measurements from a live device. The phys-address values use the canonical colon-separated hexadecimal form defined for <span>[<a href="#RFC6991" class="cite xref">RFC6991</a>]</span>'s phys-address type.<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
 <div class="breakable lang-json sourcecode" id="appendix-A.2-5">
 <pre>
    {
@@ -2125,7 +2020,7 @@ ietf-interfaces defines it using the YANG binary type.<a href="#appendix-A.2-4" 
               "admin-status": "up",
               "oper-status": "up",
               "if-index": 10,
-              "phys-address": "qrvMCwEA",
+              "phys-address": "00:01:02:03:04:05",
               "speed": "10000000000",
               "higher-layer-if": [
                 "Bundle-Ether10"
@@ -2147,20 +2042,41 @@ ietf-interfaces defines it using the YANG binary type.<a href="#appendix-A.2-4" 
               "type": "iana-if-type:ethernetCsmacd",
               "admin-status": "up",
               "oper-status": "up",
+              "if-index": 11,
+              "phys-address": "00:01:02:03:04:08",
               "higher-layer-if": [
                 "Bundle-Ether10"
               ],
-              "lower-layer-if": []
+              "lower-layer-if": [],
+              "device-interface-attributes:inventory-ref": {
+                "port-ref": "TenGigE0/1/0/1"
+              },
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/1/0/1"
+                }
+              ]
             },
             {
               "name": "Bundle-Ether10",
               "type": "iana-if-type:ieee8023adLag",
               "admin-status": "up",
               "oper-status": "up",
+              "if-index": 12,
+              "phys-address": "00:01:02:03:04:09",
               "higher-layer-if": [],
               "lower-layer-if": [
                 "TenGigE0/1/0/0",
                 "TenGigE0/1/0/1"
+              ],
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "Bundle-Ether10"
+                }
               ],
               "ietf-ip:ipv4": {
                 "mtu": 9216,
@@ -2177,21 +2093,41 @@ ietf-interfaces defines it using the YANG binary type.<a href="#appendix-A.2-4" 
               "type": "iana-if-type:ethernetCsmacd",
               "admin-status": "up",
               "oper-status": "up",
+              "if-index": 20,
+              "phys-address": "00:01:02:03:04:06",
               "higher-layer-if": [
                 "TenGigE0/2/0/0.100",
                 "TenGigE0/2/0/0.200",
                 "TenGigE0/2/0/0.300"
               ],
-              "lower-layer-if": []
+              "lower-layer-if": [],
+              "device-interface-attributes:inventory-ref": {
+                "port-ref": "TenGigE0/2/0/0"
+              },
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/2/0/0"
+                }
+              ]
             },
             {
               "name": "TenGigE0/2/0/0.100",
               "type": "iana-if-type:l2vlan",
               "admin-status": "up",
               "oper-status": "up",
+              "if-index": 21,
               "higher-layer-if": [],
               "lower-layer-if": [
                 "TenGigE0/2/0/0"
+              ],
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/2/0/0.100"
+                }
               ],
               "device-interface-attributes:vlan-id": 100,
               "ietf-ip:ipv4": {
@@ -2199,7 +2135,63 @@ ietf-interfaces defines it using the YANG binary type.<a href="#appendix-A.2-4" 
                 "address": [
                   {
                     "ip": "192.0.2.1",
-                    "prefix-length": 24
+                    "prefix-length": 26
+                  }
+                ]
+              }
+            },
+            {
+              "name": "TenGigE0/2/0/0.200",
+              "type": "iana-if-type:l2vlan",
+              "admin-status": "up",
+              "oper-status": "up",
+              "if-index": 23,
+              "higher-layer-if": [],
+              "lower-layer-if": [
+                "TenGigE0/2/0/0"
+              ],
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/2/0/0.200"
+                }
+              ],
+              "device-interface-attributes:vlan-id": 200,
+              "ietf-ip:ipv4": {
+                "mtu": 1500,
+                "address": [
+                  {
+                    "ip": "192.0.2.65",
+                    "prefix-length": 26
+                  }
+                ]
+              }
+            },
+            {
+              "name": "TenGigE0/2/0/0.300",
+              "type": "iana-if-type:l2vlan",
+              "admin-status": "up",
+              "oper-status": "up",
+              "if-index": 24,
+              "higher-layer-if": [],
+              "lower-layer-if": [
+                "TenGigE0/2/0/0"
+              ],
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/2/0/0.300"
+                }
+              ],
+              "device-interface-attributes:vlan-id": 300,
+              "ietf-ip:ipv4": {
+                "mtu": 1500,
+                "address": [
+                  {
+                    "ip": "192.0.2.129",
+                    "prefix-length": 26
                   }
                 ]
               }
@@ -2209,6 +2201,8 @@ ietf-interfaces defines it using the YANG binary type.<a href="#appendix-A.2-4" 
               "type": "iana-if-type:ethernetCsmacd",
               "admin-status": "down",
               "oper-status": "down",
+              "if-index": 22,
+              "phys-address": "00:01:02:03:04:07",
               "higher-layer-if": [],
               "lower-layer-if": [],
               "device-interface-attributes:inventory-ref": {
@@ -2224,147 +2218,182 @@ ietf-interfaces defines it using the YANG binary type.<a href="#appendix-A.2-4" 
 }
 </pre><a href="#appendix-A.2-5" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-6">Note how "higher-layer-if"/"lower-layer-if" give the LAG&lt;-&gt;member
-and VLAN&lt;-&gt;parent relationships directly, in both directions, with
-no topology-network traversal required; "inventory-ref" and
-"topology-ref" remain available for clients that still need to
-correlate back into inventory or topology views. Interface capacity,
-IP addressing, and per-family MTU come from the mounted base modules;
-they are not duplicated by the augmentation. "controller-annotation"
-allows a controller to attach an optional free-form note to an
-interface.<a href="#appendix-A.2-6" class="pilcrow">¶</a></p>
-<p id="appendix-A.2-7">The "TenGigE0/2/0/1" entry illustrates that an interface may have
-no "topology-ref" entries while "inventory-ref" remains
-populated with the known chassis-port component.<a href="#appendix-A.2-7" class="pilcrow">¶</a></p>
-</section>
-</div>
-</section>
-</div>
-<div id="comparison-against-commonly-implemented-interface-attributes">
-<section id="appendix-B">
-      <h2 id="name-comparison-against-commonly">
-<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-comparison-against-commonly" class="section-name selfRef">Comparison Against Commonly Implemented Interface Attributes</a>
-      </h2>
-<p id="appendix-B-1">The attributes in this document were compared against the kind of
-attribute set commonly exposed by
-deployed, SNMP-IF-MIB-derived interface-inventory implementations
-(vendor-neutral by construction; no specific product or API is
-referenced). Table 2 summarizes the comparison; attributes already
-covered by <span>[<a href="#RFC8343" class="cite xref">RFC8343</a>]</span> or by this document's augmentation are marked
-"covered", attributes this document now adds as a result of the
-comparison are marked "added (Section 6)", and attributes judged
-out of scope for this revision are marked "deferred" with a
-one-line reason.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-B-2">
-<pre>
-+==========================+====================+==================+
-| Commonly implemented      | Disposition        | Notes            |
-| interface attribute       |                     |                  |
-+==========================+====================+==================+
-| port/interface name        | covered            | if:name          |
-|   (various forms)          |                    |                  |
-| description                | covered            | if:description   |
-| interface type              | covered           | if:type          |
-| admin status,                | covered         | if:admin-status, |
-|   operational status          |                 | if:oper-status   |
-| interface index              | covered           | if:if-index      |
-| MAC / physical address       | covered           | if:phys-address  |
-| interface speed               | covered          | if:speed         |
-| link up/down trap enable      | covered          | if:link-up-down- |
-|                               |                   |  trap-enable    |
-| maximum transmission unit      | covered          | ietf-ip:ipv4/mtu,|
-|   (MTU)                        |                  | ietf-ip:ipv6/mtu |
-|                                |                  | ({{RFC8344}})    |
-|   state                         |               |                 |
-| separate port, connector, and    | deferred     | distinct        |
-|   equipment identifiers          |              | connector-vs-   |
-|                                   |              | port identity   |
-|                                   |              | not modeled;    |
-|                                   |              | 'inventory-ref. |
-|                                   |              | port-ref' is an |
-|                                   |              | approximation   |
-| physical connector presence       | deferred    | optics-presence |
-|   flag                            |             | not modeled     |
-| promiscuous-mode flag, SPAN/      | deferred     | niche/internal; |
-|   RSPAN monitoring flag,          |              |  no operator-   |
-|   internal location index,        |             |  facing need    |
-|   soak timers, supported MTU      |              |  identified yet |
-|   range, shared risk resource     |              |                 |
-|   group id, entity alias          |              |                 |
-|   mapping identifier, LAG end     |              |                 |
-|   identifier, alias name          |              |                 |
-+==========================+====================+==================+
-</pre><a href="#appendix-B-2" class="pilcrow">¶</a>
-</div>
-<p id="appendix-B-3">Table 2: Commonly implemented attribute comparison<a href="#appendix-B-3" class="pilcrow">¶</a></p>
-<p id="appendix-B-4">The "added" row items are incorporated directly into the YANG
-module in Section 6 and the tree diagram in Section 5.2; the
-"deferred" items are recorded here so a future revision does not
-have to repeat this comparison from scratch.<a href="#appendix-B-4" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="openconfig-comparisons">
-<section id="appendix-C">
-      <h2 id="name-openconfig-comparisons">
-<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-openconfig-comparisons" class="section-name selfRef">OpenConfig Comparisons</a>
-      </h2>
-<div id="interface-layering">
-<section id="appendix-C.1">
-        <h3 id="name-interface-layering">
-<a href="#appendix-C.1" class="section-number selfRef">C.1. </a><a href="#name-interface-layering" class="section-name selfRef">Interface Layering</a>
-        </h3>
-<p id="appendix-C.1-1">The bidirectional LAG/VLAN stacking design in Section 5.1 is
-validated by real-world experience in OpenConfig: when
-openconfig-interfaces alone proved insufficient for LAG
-membership queries, openconfig-if-aggregate added both directions
-of the same relationship <span>[<a href="#RFC8343" class="cite xref">RFC8343</a>]</span> Section 3.3 provides
-generically -- an aggregate interface's "aggregation/state/
-member" leaf-list points down at its member interfaces, and each
-member's "ethernet/config/aggregate-id" leaf points back up at
-its aggregate -- for the specific case of LAGs. That OpenConfig
-had to add this reverse pointer explicitly, after the fact and
-for one interface type, is strong practical evidence that a
-generic bidirectional stacking mechanism is required at the
-interface-model layer. This document relies on <span>[<a href="#RFC8343" class="cite xref">RFC8343</a>]</span>
-generic mechanism instead of a LAG-specific one so that the same
-"higher-layer-if"/"lower-layer-if" pair also covers VLAN
-sub-interfaces and other interface-type stacking without a
-separate leaf per interface type.<a href="#appendix-C.1-1" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="attribute-comparisons">
-<section id="appendix-C.2">
-        <h3 id="name-attribute-comparisons">
-<a href="#appendix-C.2" class="section-number selfRef">C.2. </a><a href="#name-attribute-comparisons" class="section-name selfRef">Attribute Comparisons</a>
-        </h3>
-<p id="appendix-C.2-1">The following comparisons identify related OpenConfig leaves and
-cases for which no direct counterpart was identified:<a href="#appendix-C.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-6">Note how "higher-layer-if"/"lower-layer-if" give the LAG&lt;-&gt;member and VLAN&lt;-&gt;parent relationships directly, in both directions, with no topology-network traversal required; "inventory-ref" and "topology-ref" remain available for clients that still need to correlate back into inventory or topology views. Interface capacity, IP addressing, and per-family MTU come from the mounted base modules; they are not duplicated by the augmentation. "controller-annotation" allows a controller to attach an optional free-form note to an interface.<a href="#appendix-A.2-6" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-7">The "TenGigE0/2/0/1" entry illustrates that an interface may have no "topology-ref" entries while "inventory-ref" remains populated with the known chassis-port component.<a href="#appendix-A.2-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-8">The complete source data used in this appendix -- three routers, their IVY network-inventory, IVY inventory-topology, <span>[<a href="#RFC8944" class="cite xref">RFC8944</a>]</span> L2 topology, and <span>[<a href="#RFC8346" class="cite xref">RFC8346</a>]</span>-style L3 topology -- plus the full parent data-tree fixture from which the Section 7.1 mounted-subtree response is derived -- are published as a companion file set:<a href="#appendix-A.2-8" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="appendix-C.2-2.1">
-            <p id="appendix-C.2-2.1.1">"inventory-ref/port-ref": openconfig-platform-port's
-"hardware-port" leaf provides a similar per-device binding.<a href="#appendix-C.2-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="appendix-A.2-9.1">
+            <p id="appendix-A.2-9.1.1">examples/mobilecore-region3/01-ivy-network-inventory.json<a href="#appendix-A.2-9.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="appendix-C.2-2.2">
-            <p id="appendix-C.2-2.2.1">"topology-ref": no stored interface-level topology reference was
-identified.<a href="#appendix-C.2-2.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="appendix-A.2-9.2">
+            <p id="appendix-A.2-9.2.1">examples/mobilecore-region3/02-ivy-inventory-topology.json<a href="#appendix-A.2-9.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="appendix-C.2-2.3">
-            <p id="appendix-C.2-2.3.1">"vlan-id": openconfig-vlan defines
-"/interfaces/interface/subinterfaces/subinterface/vlan/match/
-single-tagged/config/vlan-id", with the same range (1-4094).<a href="#appendix-C.2-2.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="appendix-A.2-9.3">
+            <p id="appendix-A.2-9.3.1">examples/mobilecore-region3/03-l2-topology.json<a href="#appendix-A.2-9.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="appendix-C.2-2.4">
-            <p id="appendix-C.2-2.4.1">IP addressing and per-family MTU are represented using <span>[<a href="#RFC8344" class="cite xref">RFC8344</a>]</span>
-(ietf-ip) rather than as additional augmentation leaves. OpenConfig
-models interface IP configuration under openconfig-if-ip, and models
-interface MTU under openconfig-interfaces.<a href="#appendix-C.2-2.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="appendix-A.2-9.4">
+            <p id="appendix-A.2-9.4.1">examples/mobilecore-region3/04-l3-topology.json<a href="#appendix-A.2-9.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="appendix-C.2-2.5">
-            <p id="appendix-C.2-2.5.1">"controller-annotation": no counterpart was identified for this unstructured field.<a href="#appendix-C.2-2.5.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="appendix-A.2-9.5">
+            <p id="appendix-A.2-9.5.1">examples/mobilecore-region3/05-network-interface-schema-mount-v4.json<a href="#appendix-A.2-9.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.2-9.6">
+            <p id="appendix-A.2-9.6.1">inventory-network-interfaces@2026-11-25.yang (parent module)<a href="#appendix-A.2-9.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.2-9.7">
+            <p id="appendix-A.2-9.7.1">device-interface-attributes@2026-11-25.yang (mounted module)<a href="#appendix-A.2-9.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.2-9.8">
+            <p id="appendix-A.2-9.8.1">inventory-network-interfaces.proto (Section 7.4)<a href="#appendix-A.2-9.8.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
+<p id="appendix-A.2-10">The YANG modules, protobuf schema, source topology payloads, and worked JSON fixture are included in this repository.  The JSON fixture is a synthetic example; interface state/MAC/ifIndex values not present in the source topology payloads are illustrative, not live-device observations.<a href="#appendix-A.2-10" class="pilcrow">¶</a></p>
 </section>
 </div>
+</section>
+</div>
+<div id="northbound-interface-attribute-coverage">
+<section id="appendix-B">
+      <h2 id="name-northbound-interface-attrib">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-northbound-interface-attrib" class="section-name selfRef">Northbound Interface Attribute Coverage</a>
+      </h2>
+<p id="appendix-B-1">A controller's northbound interface should expose the attributes that
+allow clients to identify an interface, understand its operational
+state, assess its capacity, and correlate it with physical inventory
+and topology. These attributes support common consumer workflows such
+as fault isolation, capacity analysis, service visualization, and
+navigation from a topology link to the interfaces that realize it.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">Table 2 summarizes the interface attributes considered useful to
+northbound consumers. It identifies whether each attribute is provided
+by the base ietf-interfaces model or added by this document.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+        <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Interface attribute</th>
+            <th class="text-left" rowspan="1" colspan="1">Northbound value</th>
+            <th class="text-left" rowspan="1" colspan="1">Model source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Interface name</td>
+            <td class="text-left" rowspan="1" colspan="1">Identify the interface and correlate client data</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>if:name</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Description</td>
+            <td class="text-left" rowspan="1" colspan="1">Present an operator-facing label or purpose</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>if:description</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Interface type</td>
+            <td class="text-left" rowspan="1" colspan="1">Classify physical, LAG, VLAN, and logical interfaces</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>if:type</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Administrative and operational status</td>
+            <td class="text-left" rowspan="1" colspan="1">Determine configured and current availability</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>if:admin-status</code>, <code>if:oper-status</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Interface index</td>
+            <td class="text-left" rowspan="1" colspan="1">Correlate with device-level interface records</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>if:if-index</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Physical address</td>
+            <td class="text-left" rowspan="1" colspan="1">Identify the interface-layer address when present</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>if:phys-address</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Interface speed</td>
+            <td class="text-left" rowspan="1" colspan="1">Support capacity and performance analysis</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>if:speed</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Link-up/down trap enable</td>
+            <td class="text-left" rowspan="1" colspan="1">Indicate whether link-state notifications are enabled</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>if:link-up-down-trap-enable</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">IP addressing and MTU</td>
+            <td class="text-left" rowspan="1" colspan="1">Support reachability, service, and packet-size analysis</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>ietf-ip:ipv4/mtu</code>, <code>ietf-ip:ipv6/mtu</code> (<span>[<a href="#RFC8344" class="cite xref">RFC8344</a>]</span>)</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Inventory reference</td>
+            <td class="text-left" rowspan="1" colspan="1">Correlate an interface with a physical port</td>
+            <td class="text-left" rowspan="1" colspan="1">Section 6 augmentation</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Topology reference</td>
+            <td class="text-left" rowspan="1" colspan="1">Correlate an interface with a topology termination point</td>
+            <td class="text-left" rowspan="1" colspan="1">Section 6 augmentation</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">VLAN identifier</td>
+            <td class="text-left" rowspan="1" colspan="1">Identify the VLAN associated with a subinterface</td>
+            <td class="text-left" rowspan="1" colspan="1">Section 6 augmentation</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Interface layering</td>
+            <td class="text-left" rowspan="1" colspan="1">Navigate between physical, aggregate, and VLAN interfaces</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>higher-layer-if</code>, <code>lower-layer-if</code> (<span>[<a href="#RFC8343" class="cite xref">RFC8343</a>]</span>)</td>
+          </tr>
+        </tbody>
+      </table>
+<p id="appendix-B-4">Table 2: Attributes useful to northbound consumers<a href="#appendix-B-4" class="pilcrow">¶</a></p>
+<p id="appendix-B-5">Together, these attributes provide the information needed by
+northbound clients to identify, monitor, and correlate interfaces across
+interface, inventory, and topology views. Vendor-specific hardware,
+monitoring, policy, and lifecycle attributes are outside the scope of
+this revision and may be added by future augmentations or
+platform-inventory models.<a href="#appendix-B-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="openconfig-interoperability">
+<section id="appendix-C">
+      <h2 id="name-openconfig-interoperability">
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-openconfig-interoperability" class="section-name selfRef">OpenConfig Interoperability</a>
+      </h2>
+<p id="appendix-C-1">OpenConfig models are commonly used by controllers to discover
+interface, platform, aggregation, VLAN, and IP information from network
+devices. This document does not require devices to implement the
+proposed network-wide inventory model directly. A controller may collect
+data using OpenConfig models, correlate it with inventory and topology
+data, and expose the resulting interface inventory northbound using the
+model defined here.<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<p id="appendix-C-2">The proposed model therefore acts as a controller-facing normalization
+model. It preserves standard interface attributes, adds references to
+physical inventory and topology objects, and represents interface
+layering consistently across devices that may use different southbound
+data models.<a href="#appendix-C-2" class="pilcrow">¶</a></p>
+<p id="appendix-C-3">For example, OpenConfig aggregate and platform models can supply LAG
+membership and physical-port information. The controller can map that
+information to "higher-layer-if", "lower-layer-if", and
+"inventory-ref" in the northbound representation. Similarly,
+OpenConfig VLAN and IP models can supply VLAN identifiers, IP addresses,
+and MTU values without requiring those attributes to be duplicated in
+this augmentation.<a href="#appendix-C-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
