@@ -300,25 +300,8 @@ module inventory-network-interfaces {
 
   revision 2026-11-24 {
     description
-      "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
-       leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
-       and per-family MTU within the mounted schema set, and relies on
-       RFC 8343 if:speed for interface capacity.";
+      "Initial version of the network-wide interface inventory model.";
     reference "draft-ragalla-network-interface-inventory";
-  }
-
-  revision 2026-10-29 {
-    description
-      "-03 revision. Parent mount wrapper is unchanged; the mounted
-       augmentation no longer includes alarm attributes.";
-    reference "draft-ragalla-device-interface-inventory-03";
-  }
-
-  revision 2026-10-13 {
-    description
-      "Initial -02 parent/child split. The parent device mount wrapper
-       is separate from the mounted interface augmentation.";
-    reference "draft-ragalla-device-interface-inventory-02";
   }
 
   container network-interface-inventory {
@@ -387,28 +370,8 @@ module device-interface-attributes {
 
   revision 2026-11-24 {
     description
-      "-04 revision. Removes ip-address, mtu, and layer-rate augmentation
-       leaves; relies on RFC 8344 (ietf-ip) for interface IP addressing
-       and per-family MTU within the mounted schema set, and relies on
-       RFC 8343 if:speed for interface capacity.";
+      "Initial version of the device interface attributes augmentation.";
     reference "draft-ragalla-network-interface-inventory";
-  }
-
-  revision 2026-10-29 {
-    description
-      "-03 revision. Removes current-alarm-severity and alarm-ref from
-       the mounted interface augmentation. All remaining augmentation
-       data is operational/read-only; cross-mount correlations use
-       string identifiers to respect the RFC 8528 mount-jail boundary.";
-    reference "draft-ragalla-device-interface-inventory-03";
-  }
-
-  revision 2026-10-13 {
-    description
-      "Initial -02 mounted-interface augmentation. All augmentation
-       data is operational/read-only. Cross-mount correlations use
-       string identifiers to respect the RFC 8528 mount-jail boundary.";
-    reference "draft-ragalla-device-interface-inventory-02";
   }
 
   grouping topology-ref {
@@ -593,105 +556,59 @@ registrations requested in a later revision.
 
 --- back
 
-# Full Worked Example (mobilecore.region3)
+# Illustrative Example
 
-This appendix uses a synthetic three-router network to show how the
-proposed model brings together interface data, physical inventory, and
-topology references. It first describes the network and the behavior
-the example is intended to illustrate. It then shows the corresponding
-mounted interface inventory and the correlations exposed by the model.
+This section uses a synthetic three-router network to show how the proposed model brings together interface data, physical inventory, and topology references. It first describes the network and the behavior the example is intended to illustrate. It then shows the corresponding mounted interface inventory and the correlations exposed by the model.
 
-The complete source data used in this appendix -- three routers, their
-IVY network-inventory, IVY inventory-topology, {{RFC8944}} L2
-topology, and {{RFC8346}}-style L3 topology -- plus the full
-parent data-tree fixture from which the Section 7.1 mounted-subtree
-response is derived -- are published as a companion file set:
+## Sample Network
 
-*  examples/mobilecore-region3/01-ivy-network-inventory.json
-*  examples/mobilecore-region3/02-ivy-inventory-topology.json
-*  examples/mobilecore-region3/03-l2-topology.json
-*  examples/mobilecore-region3/04-l3-topology.json
-*  examples/mobilecore-region3/05-network-interface-schema-mount-v4.json
-*  inventory-network-interfaces@2026-11-25.yang (parent module)
-*  device-interface-attributes@2026-11-25.yang (mounted module)
-*  inventory-network-interfaces.proto (Section 7.4)
-
-The YANG modules, protobuf schema, source topology payloads, and worked JSON fixture are included in this repository.  The JSON fixture is a synthetic example; interface state/MAC/ifIndex values not present in the source topology payloads are illustrative, not live-device observations.
-
-## Example Network and Illustrative Goals
-
-The topology payloads describe the following three-router connectivity.
-RouterA, RouterB, and RouterC are shorthand for the corresponding
-*.subdomain1.region3.bt.uk node identifiers in the fixture.
+The topology payloads describe the following three-router connectivity.  RouterA, RouterB, and RouterC are network elements in subdomain1.region3.isp.example.net.
 
                             RouterA
+            TenGigE0/2/0/0   /   \ HundredGigE0/2/0/0
+                            /     \
                            /       \
                           /         \
        VLAN 100/200/300  /           \ 100G physical link
-       TenGigE0/2/0/0   /             \ HundredGigE0/2/0/0
+                        /             \
                        /               \
-                  RouterB =============== RouterC
-                          Bundle-Ether10
+       TenGigE0/2/0/0 /                 \ HundredGigE0/2/0/0
+                RouterB =============== RouterC
+                        Bundle-Ether10
                             (LAG)
-                Members at each end: TenGigE0/1/0/0 and
-                                     TenGigE0/1/0/1
+        Members at each end: TenGigE0/1/0/0 and TenGigE0/1/0/1
 
-RouterB inventory-only ports: TenGigE0/2/0/1 and HundredGigE0/2/0/1 (no topology TP/link).
+RouterA-to-RouterB connection has VLAN subinterfaces 100, 200, and 300 over physical TenGigE port.  RouterB and RouterC connect through the Bundle-Ether10 LAG; the two member links are shown below it. RouterA and RouterC have a direct HundredGigE link.
 
-The RouterA-to-RouterB connection has VLAN subinterfaces 100, 200, and 300 over the physical TenGigE port.  RouterB and RouterC connect through the Bundle-Ether10 LAG; the two member links are shown below it. RouterA and RouterC have a direct HundredGigE link.
+RouterB also has ports: TenGigE0/2/0/1 and HundredGigE0/2/0/1 that do not participate in topology i.e., there is no link or termination point.
 
 The example is intended to illustrate three client tasks:
 
-* navigating from a topology connection to the device interfaces that
-  realize it, including the members of a LAG;
-* following interface-layering relationships between a physical
-  interface and its VLAN subinterfaces; and
-* distinguishing a known inventory port from a topology termination
-  point, as demonstrated by RouterB's inventory-only ports.
+- navigating from a topology connection to the device interfaces that realize it, including the members of a LAG;
+- following interface-layering relationships between a physical interface and its VLAN subinterfaces; and
+- distinguishing a known inventory port from a topology termination point, as demonstrated by RouterB's inventory-only ports.
 
-These relationships can be represented without requiring a client to
-reconstruct them by joining unrelated datasets. The mounted interface
-tree provides the per-device interface state and layering, while the
-augmentation supplies the inventory and topology correlations.
+These relationships can be represented without requiring a client to reconstruct them by joining unrelated datasets. The mounted interface tree provides the per-device interface state and layering, while the augmentation supplies the inventory and topology correlations.
 
-RouterB's interfaces are represented as follows in the source inventory and topology data:
+RouterB is chosen as one sample router to showcase how its interfaces are represented in network interface inventory and to relate them to topology and physical inventory models. RouterB has a combination of VLAN, Bundle and physical interfaces, making it a good choice to cover the concept:
 
-*  TenGigE0/2/0/0: physical interface in the physical and L2 views.
-*  TenGigE0/2/0/0.100 through .300: VLAN subinterfaces in L2 and L3.
-*  TenGigE0/1/0/0 and TenGigE0/1/0/1: physical LAG members.
-*  Bundle-Ether10: LAG represented in L2 and L3.
-*  TenGigE0/2/0/1 and HundredGigE0/2/0/1: inventory-only ports.
-
+-  TenGigE0/2/0/0: physical interface in the physical inventory and L2 topology views.
+-  TenGigE0/2/0/0.100 through .300: VLAN subinterfaces in L2 and L3 topology.
+-  TenGigE0/1/0/0 and TenGigE0/1/0/1: physical LAG members.
+-  Bundle-Ether10: LAG represented in L2 and L3.
+-  TenGigE0/2/0/1 and HundredGigE0/2/0/1: inventory-only ports.
 
 ## Interface Inventory Representation
 
-The proposed model covers RouterB's interface inventory through one
-device entry keyed by its network-element reference. Under that entry,
-the mounted "ietf-interfaces:interfaces" subtree carries the standard
-interface identity, type, state, speed, IP addressing, MTU, and
-layering relationships. The mounted augmentation adds:
+The proposed model covers RouterB's interface inventory through one device entry keyed by its network-element reference. Under that entry, the mounted "ietf-interfaces:interfaces" subtree carries the standard interface identity, type, state, speed, IP addressing, MTU, and layering relationships. The mounted augmentation adds:
 
-* "inventory-ref" when an interface can be associated with a physical
-  inventory port;
-* "topology-ref" when the interface is represented by one or more
-  topology termination points; and
-* "vlan-id" and "controller-annotation" for the additional interface
-  information defined by this proposal.
+- "inventory-ref" when an interface can be associated with a physical inventory port;
+- "topology-ref" when the interface is represented by one or more topology termination points; and
+- "vlan-id" and "controller-annotation" for the additional interface information defined by this proposal.
 
-The following shortened {{RFC7951}} example shows the full
-parent data-tree shape using the worked example in this appendix. It
-is a fixture, not the literal body of the subtree GET in Section
-7.1; that GET returns the inner "ietf-interfaces:interfaces"
-resource representation. The complete three-router fixture is
-identified as "05-network-interfaces-schema-mount-v4.json"; that
-companion fixture needs to be updated to match this revision.
+The following shortened {{RFC7951}} example shows the full parent data-tree shape using the worked example in this appendix. It is a fixture, not the literal body of the subtree GET in Section 7.1; that GET returns the inner "ietf-interfaces:interfaces" resource representation. The complete three-router fixture is identified as "05-network-interfaces-schema-mount-v4.json"; that companion fixture needs to be updated to match this revision.
 
-The topology relationships and documented-prefix IP addresses come
-from the synthetic source payloads. The if-index, MAC address, and
-admin/oper states are illustrative placeholders, not measurements
-from a live device.
-In the {{RFC7951}} encoding below, phys-address is base64 because
-ietf-interfaces defines it using the YANG binary type.
+The topology relationships and documented-prefix IP addresses come from the synthetic source payloads. The if-index, MAC address, and admin/oper states are illustrative placeholders, not measurements from a live device. The phys-address values use the canonical colon-separated hexadecimal form defined for {{RFC6991}}'s phys-address type.
 
 ~~~ json
    {
@@ -707,7 +624,7 @@ ietf-interfaces defines it using the YANG binary type.
               "admin-status": "up",
               "oper-status": "up",
               "if-index": 10,
-              "phys-address": "qrvMCwEA",
+              "phys-address": "00:01:02:03:04:05",
               "speed": "10000000000",
               "higher-layer-if": [
                 "Bundle-Ether10"
@@ -729,20 +646,41 @@ ietf-interfaces defines it using the YANG binary type.
               "type": "iana-if-type:ethernetCsmacd",
               "admin-status": "up",
               "oper-status": "up",
+              "if-index": 11,
+              "phys-address": "00:01:02:03:04:08",
               "higher-layer-if": [
                 "Bundle-Ether10"
               ],
-              "lower-layer-if": []
+              "lower-layer-if": [],
+              "device-interface-attributes:inventory-ref": {
+                "port-ref": "TenGigE0/1/0/1"
+              },
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/1/0/1"
+                }
+              ]
             },
             {
               "name": "Bundle-Ether10",
               "type": "iana-if-type:ieee8023adLag",
               "admin-status": "up",
               "oper-status": "up",
+              "if-index": 12,
+              "phys-address": "00:01:02:03:04:09",
               "higher-layer-if": [],
               "lower-layer-if": [
                 "TenGigE0/1/0/0",
                 "TenGigE0/1/0/1"
+              ],
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "Bundle-Ether10"
+                }
               ],
               "ietf-ip:ipv4": {
                 "mtu": 9216,
@@ -759,21 +697,41 @@ ietf-interfaces defines it using the YANG binary type.
               "type": "iana-if-type:ethernetCsmacd",
               "admin-status": "up",
               "oper-status": "up",
+              "if-index": 20,
+              "phys-address": "00:01:02:03:04:06",
               "higher-layer-if": [
                 "TenGigE0/2/0/0.100",
                 "TenGigE0/2/0/0.200",
                 "TenGigE0/2/0/0.300"
               ],
-              "lower-layer-if": []
+              "lower-layer-if": [],
+              "device-interface-attributes:inventory-ref": {
+                "port-ref": "TenGigE0/2/0/0"
+              },
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/2/0/0"
+                }
+              ]
             },
             {
               "name": "TenGigE0/2/0/0.100",
               "type": "iana-if-type:l2vlan",
               "admin-status": "up",
               "oper-status": "up",
+              "if-index": 21,
               "higher-layer-if": [],
               "lower-layer-if": [
                 "TenGigE0/2/0/0"
+              ],
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/2/0/0.100"
+                }
               ],
               "device-interface-attributes:vlan-id": 100,
               "ietf-ip:ipv4": {
@@ -781,7 +739,63 @@ ietf-interfaces defines it using the YANG binary type.
                 "address": [
                   {
                     "ip": "192.0.2.1",
-                    "prefix-length": 24
+                    "prefix-length": 26
+                  }
+                ]
+              }
+            },
+            {
+              "name": "TenGigE0/2/0/0.200",
+              "type": "iana-if-type:l2vlan",
+              "admin-status": "up",
+              "oper-status": "up",
+              "if-index": 23,
+              "higher-layer-if": [],
+              "lower-layer-if": [
+                "TenGigE0/2/0/0"
+              ],
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/2/0/0.200"
+                }
+              ],
+              "device-interface-attributes:vlan-id": 200,
+              "ietf-ip:ipv4": {
+                "mtu": 1500,
+                "address": [
+                  {
+                    "ip": "192.0.2.65",
+                    "prefix-length": 26
+                  }
+                ]
+              }
+            },
+            {
+              "name": "TenGigE0/2/0/0.300",
+              "type": "iana-if-type:l2vlan",
+              "admin-status": "up",
+              "oper-status": "up",
+              "if-index": 24,
+              "higher-layer-if": [],
+              "lower-layer-if": [
+                "TenGigE0/2/0/0"
+              ],
+              "device-interface-attributes:topology-ref": [
+                {
+                  "network-ref": "mobilecore.region3.l2",
+                  "node-ref": "RouterB.subdomain1.region3.isp.example.net",
+                  "tp-ref": "TenGigE0/2/0/0.300"
+                }
+              ],
+              "device-interface-attributes:vlan-id": 300,
+              "ietf-ip:ipv4": {
+                "mtu": 1500,
+                "address": [
+                  {
+                    "ip": "192.0.2.129",
+                    "prefix-length": 26
                   }
                 ]
               }
@@ -791,6 +805,8 @@ ietf-interfaces defines it using the YANG binary type.
               "type": "iana-if-type:ethernetCsmacd",
               "admin-status": "down",
               "oper-status": "down",
+              "if-index": 22,
+              "phys-address": "00:01:02:03:04:07",
               "higher-layer-if": [],
               "lower-layer-if": [],
               "device-interface-attributes:inventory-ref": {
@@ -806,121 +822,81 @@ ietf-interfaces defines it using the YANG binary type.
 }
 ~~~
 
-Note how "higher-layer-if"/"lower-layer-if" give the LAG<->member
-and VLAN<->parent relationships directly, in both directions, with
-no topology-network traversal required; "inventory-ref" and
-"topology-ref" remain available for clients that still need to
-correlate back into inventory or topology views. Interface capacity,
-IP addressing, and per-family MTU come from the mounted base modules;
-they are not duplicated by the augmentation. "controller-annotation"
-allows a controller to attach an optional free-form note to an
-interface.
+Note how "higher-layer-if"/"lower-layer-if" give the LAG<->member and VLAN<->parent relationships directly, in both directions, with no topology-network traversal required; "inventory-ref" and "topology-ref" remain available for clients that still need to correlate back into inventory or topology views. Interface capacity, IP addressing, and per-family MTU come from the mounted base modules; they are not duplicated by the augmentation. "controller-annotation" allows a controller to attach an optional free-form note to an interface.
 
-The "TenGigE0/2/0/1" entry illustrates that an interface may have
-no "topology-ref" entries while "inventory-ref" remains
-populated with the known chassis-port component.
+The "TenGigE0/2/0/1" entry illustrates that an interface may have no "topology-ref" entries while "inventory-ref" remains populated with the known chassis-port component.
 
-# Comparison Against Commonly Implemented Interface Attributes
+The complete source data used in this appendix -- three routers, their IVY network-inventory, IVY inventory-topology, {{RFC8944}} L2 topology, and {{RFC8346}}-style L3 topology -- plus the full parent data-tree fixture from which the Section 7.1 mounted-subtree response is derived -- are published as a companion file set:
 
-The attributes in this document were compared against the kind of
-attribute set commonly exposed by
-deployed, SNMP-IF-MIB-derived interface-inventory implementations
-(vendor-neutral by construction; no specific product or API is
-referenced). Table 2 summarizes the comparison; attributes already
-covered by {{RFC8343}} or by this document's augmentation are marked
-"covered", attributes this document now adds as a result of the
-comparison are marked "added (Section 6)", and attributes judged
-out of scope for this revision are marked "deferred" with a
-one-line reason.
+*  examples/mobilecore-region3/01-ivy-network-inventory.json
+*  examples/mobilecore-region3/02-ivy-inventory-topology.json
+*  examples/mobilecore-region3/03-l2-topology.json
+*  examples/mobilecore-region3/04-l3-topology.json
+*  examples/mobilecore-region3/05-network-interface-schema-mount-v4.json
+*  inventory-network-interfaces@2026-11-25.yang (parent module)
+*  device-interface-attributes@2026-11-25.yang (mounted module)
+*  inventory-network-interfaces.proto (Section 7.4)
 
-~~~
-+==========================+====================+==================+
-| Commonly implemented      | Disposition        | Notes            |
-| interface attribute       |                     |                  |
-+==========================+====================+==================+
-| port/interface name        | covered            | if:name          |
-|   (various forms)          |                    |                  |
-| description                | covered            | if:description   |
-| interface type              | covered           | if:type          |
-| admin status,                | covered         | if:admin-status, |
-|   operational status          |                 | if:oper-status   |
-| interface index              | covered           | if:if-index      |
-| MAC / physical address       | covered           | if:phys-address  |
-| interface speed               | covered          | if:speed         |
-| link up/down trap enable      | covered          | if:link-up-down- |
-|                               |                   |  trap-enable    |
-| maximum transmission unit      | covered          | ietf-ip:ipv4/mtu,|
-|   (MTU)                        |                  | ietf-ip:ipv6/mtu |
-|                                |                  | ({{RFC8344}})    |
-|   state                         |               |                 |
-| separate port, connector, and    | deferred     | distinct        |
-|   equipment identifiers          |              | connector-vs-   |
-|                                   |              | port identity   |
-|                                   |              | not modeled;    |
-|                                   |              | 'inventory-ref. |
-|                                   |              | port-ref' is an |
-|                                   |              | approximation   |
-| physical connector presence       | deferred    | optics-presence |
-|   flag                            |             | not modeled     |
-| promiscuous-mode flag, SPAN/      | deferred     | niche/internal; |
-|   RSPAN monitoring flag,          |              |  no operator-   |
-|   internal location index,        |             |  facing need    |
-|   soak timers, supported MTU      |              |  identified yet |
-|   range, shared risk resource     |              |                 |
-|   group id, entity alias          |              |                 |
-|   mapping identifier, LAG end     |              |                 |
-|   identifier, alias name          |              |                 |
-+==========================+====================+==================+
-~~~
+The YANG modules, protobuf schema, source topology payloads, and worked JSON fixture are included in this repository.  The JSON fixture is a synthetic example; interface state/MAC/ifIndex values not present in the source topology payloads are illustrative, not live-device observations.
 
-Table 2: Commonly implemented attribute comparison
+# Northbound Interface Attribute Coverage
 
-The "added" row items are incorporated directly into the YANG
-module in Section 6 and the tree diagram in Section 5.2; the
-"deferred" items are recorded here so a future revision does not
-have to repeat this comparison from scratch.
+A controller's northbound interface should expose the attributes that
+allow clients to identify an interface, understand its operational
+state, assess its capacity, and correlate it with physical inventory
+and topology. These attributes support common consumer workflows such
+as fault isolation, capacity analysis, service visualization, and
+navigation from a topology link to the interfaces that realize it.
 
-# OpenConfig Comparisons
+Table 2 summarizes the interface attributes considered useful to
+northbound consumers. It identifies whether each attribute is provided
+by the base ietf-interfaces model or added by this document.
 
-## Interface Layering
+| Interface attribute | Northbound value | Model source |
+| --- | --- | --- |
+| Interface name | Identify the interface and correlate client data | `if:name` |
+| Description | Present an operator-facing label or purpose | `if:description` |
+| Interface type | Classify physical, LAG, VLAN, and logical interfaces | `if:type` |
+| Administrative and operational status | Determine configured and current availability | `if:admin-status`, `if:oper-status` |
+| Interface index | Correlate with device-level interface records | `if:if-index` |
+| Physical address | Identify the interface-layer address when present | `if:phys-address` |
+| Interface speed | Support capacity and performance analysis | `if:speed` |
+| Link-up/down trap enable | Indicate whether link-state notifications are enabled | `if:link-up-down-trap-enable` |
+| IP addressing and MTU | Support reachability, service, and packet-size analysis | `ietf-ip:ipv4/mtu`, `ietf-ip:ipv6/mtu` ({{RFC8344}}) |
+| Inventory reference | Correlate an interface with a physical port | Section 6 augmentation |
+| Topology reference | Correlate an interface with a topology termination point | Section 6 augmentation |
+| VLAN identifier | Identify the VLAN associated with a subinterface | Section 6 augmentation |
+| Interface layering | Navigate between physical, aggregate, and VLAN interfaces | `higher-layer-if`, `lower-layer-if` ({{RFC8343}}) |
 
-The bidirectional LAG/VLAN stacking design in Section 5.1 is
-validated by real-world experience in OpenConfig: when
-openconfig-interfaces alone proved insufficient for LAG
-membership queries, openconfig-if-aggregate added both directions
-of the same relationship {{RFC8343}} Section 3.3 provides
-generically -- an aggregate interface's "aggregation/state/
-member" leaf-list points down at its member interfaces, and each
-member's "ethernet/config/aggregate-id" leaf points back up at
-its aggregate -- for the specific case of LAGs. That OpenConfig
-had to add this reverse pointer explicitly, after the fact and
-for one interface type, is strong practical evidence that a
-generic bidirectional stacking mechanism is required at the
-interface-model layer. This document relies on {{RFC8343}}
-generic mechanism instead of a LAG-specific one so that the same
-"higher-layer-if"/"lower-layer-if" pair also covers VLAN
-sub-interfaces and other interface-type stacking without a
-separate leaf per interface type.
+Table 2: Attributes useful to northbound consumers
 
-## Attribute Comparisons
+Together, these attributes provide the information needed by
+northbound clients to identify, monitor, and correlate interfaces across
+interface, inventory, and topology views. Vendor-specific hardware,
+monitoring, policy, and lifecycle attributes are outside the scope of
+this revision and may be added by future augmentations or
+platform-inventory models.
 
-The following comparisons identify related OpenConfig leaves and
-cases for which no direct counterpart was identified:
+# OpenConfig Interoperability
 
-- "inventory-ref/port-ref": openconfig-platform-port's
-  "hardware-port" leaf provides a similar per-device binding.
+OpenConfig models are commonly used by controllers to discover
+interface, platform, aggregation, VLAN, and IP information from network
+devices. This document does not require devices to implement the
+proposed network-wide inventory model directly. A controller may collect
+data using OpenConfig models, correlate it with inventory and topology
+data, and expose the resulting interface inventory northbound using the
+model defined here.
 
-- "topology-ref": no stored interface-level topology reference was
-  identified.
+The proposed model therefore acts as a controller-facing normalization
+model. It preserves standard interface attributes, adds references to
+physical inventory and topology objects, and represents interface
+layering consistently across devices that may use different southbound
+data models.
 
-- "vlan-id": openconfig-vlan defines
-  "/interfaces/interface/subinterfaces/subinterface/vlan/match/
-  single-tagged/config/vlan-id", with the same range (1-4094).
-
-- IP addressing and per-family MTU are represented using {{RFC8344}}
-  (ietf-ip) rather than as additional augmentation leaves. OpenConfig
-  models interface IP configuration under openconfig-if-ip, and models
-  interface MTU under openconfig-interfaces.
-
-
-- "controller-annotation": no counterpart was identified for this unstructured field.
+For example, OpenConfig aggregate and platform models can supply LAG
+membership and physical-port information. The controller can map that
+information to "higher-layer-if", "lower-layer-if", and
+"inventory-ref" in the northbound representation. Similarly,
+OpenConfig VLAN and IP models can supply VLAN identifiers, IP addresses,
+and MTU values without requiring those attributes to be duplicated in
+this augmentation.
